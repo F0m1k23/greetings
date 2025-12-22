@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+    --soft-ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+/* Reusable subtle transition helper */
+.soft-transition {
+    transition-property: color, background-color, box-shadow, transform;
+    transition-duration: 150ms;
+    transition-timing-function: var(--soft-ease);
+}
+
+#app {
+    min-height: 100vh;
+    height: auto;
+}
+
+/* Theme palette (tweak to taste) */
+:root {
+    --bg: #0f172a;
+    /* dark background for app frame */
+    --surface: rgba(255, 255, 255, 0.04);
+    --card-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    --muted: #94a3b8;
+    --primary: #6c5ce7;
+    /* soft violet */
+    --accent: #7dd3fc;
+    /* aqua */
+    --glass-border: rgba(255, 255, 255, 0.06);
+}
+
+/* Card look: subtle glass + soft shadow */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.06);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+/* Primary button used on Preview */
+.btn-primary {
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    color: white !important;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.12);
+    transition: transform 140ms var(--soft-ease), box-shadow 140ms var(--soft-ease);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+/* Navigation bar glass */
+.nav-glass {
+    background: rgba(255, 255, 255, 0.02);
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(6px);
+}
+
+/* Small pill/chip */
+.chip {
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+/* Empty state subtle text */
+.empty-state {
+    color: var(--muted);
+    transition: opacity 150ms var(--soft-ease);
+}
+
+/* small helper for icon buttons */
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+}
