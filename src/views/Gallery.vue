@@ -60,8 +60,9 @@ onMounted(async () => {
 
 	// Then try to load from API if available
 	try {
+		const apiUrl = import.meta.env.VITE_API_URL || '/api'
 		const r = await fetch(
-			`/api/unsplash/search?query=${encodeURIComponent(
+			`${apiUrl}/unsplash/search?query=${encodeURIComponent(
 				card.value.title
 			)}&perPage=12`
 		)
