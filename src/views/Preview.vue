@@ -279,22 +279,32 @@ function sendGreeting() {
 }
 
 function shareImage(img) {
-	if (window.Telegram?.WebApp) {
-		window.Telegram.WebApp.sendData(
-			JSON.stringify({
-				type: 'share_image',
-				image: {
-					src: img.src,
-					title: img.title,
-					author: img.author,
-					unsplashUrl: img.unsplashUrl,
-				},
-			})
-		)
-	} else {
-		navigator.clipboard?.writeText(img.src)
-		alert('Ссылка на изображение скопирована в буфер обмена')
-	}
+	// Create base64 from canvas for sharing
+	const canvas = canvasRef.value
+	if (!canvas) return
+
+	canvas.toBlob(blob => {
+		const reader = new FileReader()
+		reader.onload = () => {
+			const base64 = reader.result
+
+			if (window.Telegram?.WebApp) {
+				window.Telegram.WebApp.sendData(
+					JSON.stringify({
+						type: 'share_image',
+						imageData: base64,
+						title: img.title,
+						author: img.author,
+						unsplashUrl: img.unsplashUrl,
+					})
+				)
+			} else {
+				navigator.clipboard?.writeText(img.src)
+				alert('Ссылка на изображение скопирована в буфер обмена')
+			}
+		}
+		reader.readAsDataURL(blob)
+	}, 'image/png')
 }
 </script>
 
