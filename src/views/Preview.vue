@@ -246,46 +246,70 @@ function drawCanvas() {
 	img.src = image.value.src
 }
 
-function sendGreeting() {
+async function sendGreeting() {
 	const canvas = canvasRef.value
 	if (!canvas) return
 
-	canvas.toBlob(blob => {
-		const reader = new FileReader()
-		reader.onload = () => {
-			const base64 = reader.result
+	canvas.toBlob(async blob => {
+		const formData = new FormData()
+		formData.append('image', blob, 'card.png')
+
+		try {
+			const uploadResponse = await fetch('/api/upload', {
+				method: 'POST',
+				body: formData,
+			})
+			const { fileId } = await uploadResponse.json()
 
 			if (window.Telegram?.WebApp) {
+				console.log('Sending data to WebApp:', {
+					type: 'send_greeting',
+					fileId,
+					caption: text.value,
+				})
 				window.Telegram.WebApp.sendData(
 					JSON.stringify({
 						type: 'send_greeting',
-						imageData: base64,
+						fileId,
 						caption: text.value,
 					})
 				)
 			} else {
 				alert('Открытка создана! В Telegram Mini App она будет отправлена.')
 			}
+		} catch (error) {
+			console.error('Upload failed:', error)
+			alert('Ошибка загрузки изображения')
 		}
-		reader.readAsDataURL(blob)
 	}, 'image/png')
 }
 
-function shareImage(img) {
-	// Create base64 from canvas for sharing
+async function shareImage(img) {
+	// Upload canvas image and share
 	const canvas = canvasRef.value
 	if (!canvas) return
 
-	canvas.toBlob(blob => {
-		const reader = new FileReader()
-		reader.onload = () => {
-			const base64 = reader.result
+	canvas.toBlob(async blob => {
+		const formData = new FormData()
+		formData.append('image', blob, 'shared.png')
+
+		try {
+			const uploadResponse = await fetch('/api/upload', {
+				method: 'POST',
+				body: formData,
+			})
+			const { fileId } = await uploadResponse.json()
 
 			if (window.Telegram?.WebApp) {
+				console.log('Sharing image via WebApp:', {
+					type: 'share_image',
+					fileId,
+					title: img.title,
+				})
 				window.Telegram.WebApp.sendData(
 					JSON.stringify({
 						type: 'share_image',
-						imageData: base64,
+						fileId,
 						title: img.title,
 						author: img.author,
 						unsplashUrl: img.unsplashUrl,
@@ -295,8 +319,10 @@ function shareImage(img) {
 				navigator.clipboard?.writeText(img.src)
 				alert('Ссылка на изображение скопирована в буфер обмена')
 			}
+		} catch (error) {
+			console.error('Upload failed:', error)
+			alert('Ошибка загрузки изображения')
 		}
-		reader.readAsDataURL(blob)
 	}, 'image/png')
 }
 </script>
