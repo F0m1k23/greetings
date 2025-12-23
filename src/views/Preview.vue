@@ -255,11 +255,14 @@ async function sendGreeting() {
 		formData.append('image', blob, 'card.png')
 
 		try {
+			console.log('Uploading image...')
 			const uploadResponse = await fetch('/api/upload', {
 				method: 'POST',
 				body: formData,
 			})
+			console.log('Upload response status:', uploadResponse.status)
 			const { fileId } = await uploadResponse.json()
+			console.log('Received fileId:', fileId)
 
 			if (window.Telegram?.WebApp) {
 				console.log('Sending data to WebApp:', {
