@@ -247,34 +247,20 @@ function drawCanvas() {
 }
 
 function sendGreeting() {
-	const canvas = canvasRef.value
-	if (!canvas) return
-
-	canvas.toBlob(blob => {
-		const reader = new FileReader()
-		reader.onload = () => {
-			const base64 = reader.result
-
-			if (window.Telegram?.WebApp) {
-				console.log('Sending data to WebApp:', {
-					type: 'send_greeting',
-					imageData: base64.substring(0, 100) + '...',
-					caption: text.value,
-				})
-				window.Telegram.WebApp.sendData(
-					JSON.stringify({
-						type: 'send_greeting',
-						imageData: base64,
-						caption: text.value,
-					})
-				)
-				window.Telegram.WebApp.showAlert('Отправлено!')
-			} else {
-				alert('Открытка создана! В Telegram Mini App она будет отправлена.')
-			}
-		}
-		reader.readAsDataURL(blob)
-	}, 'image/png')
+	if (window.Telegram?.WebApp) {
+		window.Telegram.WebApp.sendData(
+			JSON.stringify({
+				type: 'send_greeting',
+				imageId: image.value.id,
+				caption: text.value,
+				fontSize: fontSize.value,
+				textColor: textColor.value,
+			})
+		)
+		window.Telegram.WebApp.showAlert('Отправлено!')
+	} else {
+		alert('Открытка создана! В Telegram Mini App она будет отправлена.')
+	}
 }
 
 function shareImage(img) {
