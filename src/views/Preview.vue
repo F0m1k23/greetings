@@ -257,7 +257,7 @@ async function sendGreeting() {
 		try {
 			console.log('Uploading image...')
 			const apiUrl = import.meta.env.VITE_API_URL || '/api'
-			const uploadResponse = await fetch(`${apiUrl}/upload`, {
+			const uploadResponse = await fetch(`${apiUrl}/api/upload`, {
 				method: 'POST',
 				body: formData,
 			})
