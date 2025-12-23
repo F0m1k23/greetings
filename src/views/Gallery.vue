@@ -5,9 +5,7 @@
 		<div v-if="card">
 			<h2 class="page-title">{{ card.title }}</h2>
 
-			<div v-if="loading" class="text-center muted mt-8">Загрузка...</div>
-			<div v-else-if="error" class="text-center muted mt-8">{{ error }}</div>
-			<div v-else class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+			<div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
 				<div
 					v-for="image in categoryImages"
 					:key="image.id"
@@ -28,8 +26,9 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router'
-import { computed, ref, onMounted } from 'vue'
+import { computed } from 'vue'
 import cards from '../data/cards'
+import images from '../data/images'
 import { useFavorites } from '../composables/useFavorites'
 
 const route = useRoute()
@@ -38,48 +37,9 @@ const { isFavorite, toggle } = useFavorites()
 
 const card = computed(() => cards.find(c => c.id === Number(route.params.id)))
 
-const categoryImages = ref([])
-const loading = ref(false)
-const error = ref('')
-
-onMounted(async () => {
-	if (!card.value) return
-	loading.value = true
-	error.value = ''
-
-	// First, load local images as fallback
-	try {
-		const imagesModule = await import('../data/images.js')
-		categoryImages.value = imagesModule.default.filter(
-			img => img.categoryId === card.value.id
-		)
-	} catch (e) {
-		console.error('Local images load error:', e)
-		categoryImages.value = []
-	}
-
-	// Then try to load from API if available
-	try {
-		const apiUrl = import.meta.env.VITE_API_URL || '/api'
-		const r = await fetch(
-			`${apiUrl}/api/unsplash/search?query=${encodeURIComponent(
-				card.value.title
-			)}&perPage=12`
-		)
-		if (r.ok) {
-			const json = await r.json()
-			if (json.results && json.results.length > 0) {
-				categoryImages.value = json.results
-				error.value = ''
-			}
-		}
-	} catch (e) {
-		console.error('API load error:', e)
-		// Keep local images, no error message
-	} finally {
-		loading.value = false
-	}
-})
+const categoryImages = computed(() =>
+	images.filter(img => img.categoryId === card.value?.id)
+)
 
 function openPreview(image) {
 	router.push({

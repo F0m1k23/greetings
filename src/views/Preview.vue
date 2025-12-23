@@ -257,7 +257,6 @@ function sendGreeting() {
 				textColor: textColor.value,
 			})
 		)
-		window.Telegram.WebApp.showAlert('Отправлено!')
 	} else {
 		alert('Открытка создана! В Telegram Mini App она будет отправлена.')
 	}
