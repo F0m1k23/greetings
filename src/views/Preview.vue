@@ -261,28 +261,6 @@ function sendGreeting() {
 		alert('Открытка создана! В Telegram Mini App она будет отправлена.')
 	}
 }
-
-function shareImage(img) {
-	if (window.Telegram?.WebApp) {
-		console.log('Sharing image via WebApp:', {
-			type: 'share_image',
-			imageId: img.id,
-			title: img.title,
-		})
-		window.Telegram.WebApp.sendData(
-			JSON.stringify({
-				type: 'share_image',
-				imageId: img.id,
-				title: img.title,
-				author: img.author,
-				unsplashUrl: img.unsplashUrl,
-			})
-		)
-	} else {
-		navigator.clipboard?.writeText(img.src)
-		alert('Ссылка на изображение скопирована в буфер обмена')
-	}
-}
 </script>
 
 <style scoped>

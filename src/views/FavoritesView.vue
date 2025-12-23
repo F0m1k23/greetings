@@ -12,25 +12,6 @@ const favoriteImages = computed(() =>
 function removeFromFavorites(id) {
 	remove(id)
 }
-
-function shareImage(image) {
-	if (window.Telegram?.WebApp) {
-		window.Telegram.WebApp.sendData(
-			JSON.stringify({
-				type: 'share_image',
-				image: {
-					src: image.src,
-					title: image.title,
-					author: image.author,
-					unsplashUrl: image.unsplashUrl,
-				},
-			})
-		)
-	} else {
-		navigator.clipboard?.writeText(image.src)
-		alert('Ссылка на изображение скопирована в буфер обмена')
-	}
-}
 </script>
 
 <template>
