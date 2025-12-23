@@ -246,88 +246,49 @@ function drawCanvas() {
 	img.src = image.value.src
 }
 
-async function sendGreeting() {
-	const canvas = canvasRef.value
-	if (!canvas) return
-
-	canvas.toBlob(async blob => {
-		const formData = new FormData()
-		formData.append('image', blob, 'card.png')
-
-		try {
-			console.log('Uploading image...')
-			const apiUrl = import.meta.env.VITE_API_URL || '/api'
-			const uploadResponse = await fetch(`${apiUrl}/api/upload`, {
-				method: 'POST',
-				body: formData,
+function sendGreeting() {
+	if (window.Telegram?.WebApp) {
+		console.log('Sending data to WebApp:', {
+			type: 'send_greeting',
+			imageId: image.value.id,
+			caption: text.value,
+			fontSize: fontSize.value,
+			textColor: textColor.value,
+		})
+		window.Telegram.WebApp.sendData(
+			JSON.stringify({
+				type: 'send_greeting',
+				imageId: image.value.id,
+				caption: text.value,
+				fontSize: fontSize.value,
+				textColor: textColor.value,
 			})
-			console.log('Upload response status:', uploadResponse.status)
-			const { fileId } = await uploadResponse.json()
-			console.log('Received fileId:', fileId)
-
-			if (window.Telegram?.WebApp) {
-				console.log('Sending data to WebApp:', {
-					type: 'send_greeting',
-					fileId,
-					caption: text.value,
-				})
-				window.Telegram.WebApp.sendData(
-					JSON.stringify({
-						type: 'send_greeting',
-						fileId,
-						caption: text.value,
-					})
-				)
-			} else {
-				alert('Открытка создана! В Telegram Mini App она будет отправлена.')
-			}
-		} catch (error) {
-			console.error('Upload failed:', error)
-			alert('Ошибка загрузки изображения')
-		}
-	}, 'image/png')
+		)
+	} else {
+		alert('Открытка создана! В Telegram Mini App она будет отправлена.')
+	}
 }
 
-async function shareImage(img) {
-	// Upload canvas image and share
-	const canvas = canvasRef.value
-	if (!canvas) return
-
-	canvas.toBlob(async blob => {
-		const formData = new FormData()
-		formData.append('image', blob, 'shared.png')
-
-		try {
-			const uploadResponse = await fetch('/api/upload', {
-				method: 'POST',
-				body: formData,
+function shareImage(img) {
+	if (window.Telegram?.WebApp) {
+		console.log('Sharing image via WebApp:', {
+			type: 'share_image',
+			imageId: img.id,
+			title: img.title,
+		})
+		window.Telegram.WebApp.sendData(
+			JSON.stringify({
+				type: 'share_image',
+				imageId: img.id,
+				title: img.title,
+				author: img.author,
+				unsplashUrl: img.unsplashUrl,
 			})
-			const { fileId } = await uploadResponse.json()
-
-			if (window.Telegram?.WebApp) {
-				console.log('Sharing image via WebApp:', {
-					type: 'share_image',
-					fileId,
-					title: img.title,
-				})
-				window.Telegram.WebApp.sendData(
-					JSON.stringify({
-						type: 'share_image',
-						fileId,
-						title: img.title,
-						author: img.author,
-						unsplashUrl: img.unsplashUrl,
-					})
-				)
-			} else {
-				navigator.clipboard?.writeText(img.src)
-				alert('Ссылка на изображение скопирована в буфер обмена')
-			}
-		} catch (error) {
-			console.error('Upload failed:', error)
-			alert('Ошибка загрузки изображения')
-		}
-	}, 'image/png')
+		)
+	} else {
+		navigator.clipboard?.writeText(img.src)
+		alert('Ссылка на изображение скопирована в буфер обмена')
+	}
 }
 </script>
 
