@@ -248,11 +248,7 @@ function drawCanvas() {
 
 function sendGreeting() {
 	const canvas = canvasRef.value
-	const buttons = buttonsRef.value
 	if (!canvas) return
-
-	// Hide buttons for clean image
-	if (buttons) buttons.style.display = 'none'
 
 	canvas.toBlob(blob => {
 		const reader = new FileReader()
@@ -270,9 +266,6 @@ function sendGreeting() {
 			} else {
 				alert('Открытка создана! В Telegram Mini App она будет отправлена.')
 			}
-
-			// Show buttons back
-			if (buttons) buttons.style.display = ''
 		}
 		reader.readAsDataURL(blob)
 	}, 'image/png')
