@@ -1,25 +1,39 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import MainLayout from '../layout/MainLayout.vue'
-
-import Home from '../pages/HomeView.vue'
-import Gallery from '../pages/Gallery.vue'
-import Favorites from '../pages/Favorites.vue'
-import Preview from '../pages/Preview.vue'
-
-const routes = [
-	{
-		path: '/',
-		component: MainLayout,
-		children: [
-			{ path: '', component: Home },
-			{ path: 'gallery', component: Gallery },
-			{ path: 'favorites', component: Favorites },
-			{ path: 'preview', component: Preview },
-		],
-	},
-]
-
-export default createRouter({
+import MainLayout from '../layouts/MainLayout.vue'
+import Home from '../views/Home.vue'
+import FavoritesView from '../views/FavoritesView.vue'
+import Gallery from '../views/Gallery.vue'
+import Preview from '../views/Preview.vue'
+const router = createRouter({
 	history: createWebHistory(),
-	routes,
+	routes: [
+		{
+			path: '/',
+			name: 'home',
+			component: MainLayout,
+			children: [
+				{
+					path: '',
+					name: 'Home',
+					component: Home,
+				},
+				{
+					path: '/favorites',
+					name: 'Favorites',
+					component: FavoritesView,
+				},
+				{
+					path: '/gallery/:id',
+					name: 'gallery',
+					component: Gallery,
+				},
+				{
+					path: '/preview',
+					name: 'preview',
+					component: Preview,
+				},
+			],
+		},
+	],
 })
+export default router

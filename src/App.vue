@@ -1,16 +1,12 @@
-<script setup>
-import { onMounted } from 'vue'
-import { useTelegram } from './composables/useTelegram'
-
-const { init } = useTelegram()
-
-onMounted(() => {
-	init()
-})
-</script>
-
 <template>
-	<router-view></router-view>
+	<router-view />
 </template>
 
-<style scoped></style>
+<script setup></script>
+
+<style scoped>
+#app {
+	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+		sans-serif;
+}
+</style>
