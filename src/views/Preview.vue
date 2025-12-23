@@ -124,6 +124,7 @@
 import { useRoute, useRouter } from 'vue-router'
 import { ref, computed, onMounted, watch } from 'vue'
 import texts from '../data/texts'
+import images from '../data/images'
 import { useFavorites } from '../composables/useFavorites'
 
 const route = useRoute()
@@ -147,7 +148,8 @@ const categoryTexts = computed(() => {
 
 onMounted(() => {
 	try {
-		image.value = JSON.parse(route.query.image)
+		const imageId = route.query.imageId
+		image.value = images.find(img => img.id === imageId)
 		if (image.value) {
 			// Set default text from category
 			const defaultTexts = texts[image.value.categoryId] || []
@@ -156,7 +158,7 @@ onMounted(() => {
 			setTimeout(() => drawCanvas(), 100)
 		}
 	} catch (e) {
-		console.error('Failed to parse image:', e)
+		console.error('Failed to find image:', e)
 	}
 })
 

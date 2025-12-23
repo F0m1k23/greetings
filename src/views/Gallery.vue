@@ -10,7 +10,7 @@
 					v-for="image in categoryImages"
 					:key="image.id"
 					class="image-tile h-64 cursor-pointer"
-					@click="openPreview(image)"
+					@click="openPreview(image.id)"
 				>
 					<img :src="image.src" :alt="image.title" loading="lazy" />
 					<div class="image-caption">
@@ -41,10 +41,10 @@ const categoryImages = computed(() =>
 	images.filter(img => img.categoryId === card.value?.id)
 )
 
-function openPreview(image) {
+function openPreview(imageId) {
 	router.push({
 		name: 'preview',
-		query: { image: JSON.stringify(image) },
+		query: { imageId },
 	})
 }
 </script>
