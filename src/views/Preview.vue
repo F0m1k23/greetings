@@ -120,23 +120,45 @@ async function send() {
 		const blob = await toBlob()
 
 		if (window.Telegram?.WebApp) {
-			// Конвертируем blob в base64
-			const reader = new FileReader()
-			reader.onload = function () {
-				const base64 = reader.result
-				// Отправляем данные в бота
-				window.Telegram.WebApp.sendData(
-					JSON.stringify({
-						type: 'greeting_card',
-						image: base64,
-						timestamp: Date.now(),
-					})
-				)
-				show('Открытка отправлена!')
+			// Отправляем изображение на backend
+			const formData = new FormData()
+			formData.append('file', blob, 'greeting-card.png')
+
+			const uploadResponse = await fetch(
+				`${import.meta.env.VITE_API_URL}/upload`,
+				{
+					method: 'POST',
+					body: formData,
+				}
+			)
+
+			if (!uploadResponse.ok) {
+				throw new Error('Failed to upload image')
 			}
-			reader.readAsDataURL(blob)
+
+			const { id: imageId } = await uploadResponse.json()
+
+			// Отправляем метаданные через sendData
+			window.Telegram.WebApp.sendData(
+				JSON.stringify({
+					type: 'send_greeting',
+					image_id: imageId,
+					text: isReadyCard.value ? readyCard.value?.title || '' : text.value,
+					timestamp: Date.now(),
+					user_id: window.Telegram.WebApp.initDataUnsafe?.user?.id,
+				})
+			)
+
+			show('Открытка отправлена!')
 		} else {
-			show('Откройте приложение через Telegram')
+			// Для обычного браузера - скачиваем
+			const url = URL.createObjectURL(blob)
+			const a = document.createElement('a')
+			a.href = url
+			a.download = 'greeting-card.png'
+			a.click()
+			URL.revokeObjectURL(url)
+			show('Открытка скачана!')
 		}
 	} catch (error) {
 		console.error('Ошибка отправки:', error)

@@ -516,8 +516,55 @@ async function saveImage() {
 	}
 }
 
-function sendCard() {
-	alert('Отправка будет доступна позже')
+async function sendCard() {
+	try {
+		const blob = await toBlob()
+
+		if (window.Telegram?.WebApp) {
+			// Отправляем изображение на backend
+			const formData = new FormData()
+			formData.append('file', blob, 'greeting-card.png')
+
+			const uploadResponse = await fetch(
+				`${import.meta.env.VITE_API_URL}/upload`,
+				{
+					method: 'POST',
+					body: formData,
+				}
+			)
+
+			if (!uploadResponse.ok) {
+				throw new Error('Failed to upload image')
+			}
+
+			const { id: imageId } = await uploadResponse.json()
+
+			// Отправляем метаданные через sendData
+			window.Telegram.WebApp.sendData(
+				JSON.stringify({
+					type: 'send_greeting',
+					image_id: imageId,
+					text: customText.value,
+					timestamp: Date.now(),
+					user_id: window.Telegram.WebApp.initDataUnsafe?.user?.id,
+				})
+			)
+
+			showMessage('Открытка отправлена!')
+		} else {
+			// Для обычного браузера - скачиваем
+			const url = URL.createObjectURL(blob)
+			const a = document.createElement('a')
+			a.href = url
+			a.download = 'greeting-card.png'
+			a.click()
+			URL.revokeObjectURL(url)
+			showMessage('Открытка скачана!')
+		}
+	} catch (error) {
+		console.error('Ошибка отправки:', error)
+		showMessage('Ошибка при отправке')
+	}
 }
 
 function showMessage(text) {

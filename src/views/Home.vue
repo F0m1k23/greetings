@@ -93,7 +93,7 @@
 			</div>
 
 			<!-- Features -->
-			<div class="mt-16 text-center">
+			<!-- <div class="mt-16 text-center">
 				<h2 class="text-2xl font-bold text-gray-200 mb-8">
 					Почему выбирают нас
 				</h2>
@@ -145,7 +145,7 @@
 						</p>
 					</div>
 				</div>
-			</div>
+			</div> -->
 		</div>
 	</div>
 </template>
