@@ -11,4 +11,9 @@ export default defineConfig({
 			'/api': 'http://localhost:3001',
 		},
 	},
+	resolve: {
+		alias: {
+			'@': path.resolve(__dirname, './src'),
+		},
+	},
 })

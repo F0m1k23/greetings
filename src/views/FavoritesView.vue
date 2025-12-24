@@ -1,23 +1,29 @@
 <script setup>
+// Импорты Vue и данных
 import { computed } from 'vue'
-import images from '../data/images'
-import { useFavorites } from '../composables/useFavorites'
+import images from '@/data/images'
+import { useFavorites } from '@/composables/useFavorites'
 
+// Инициализация composable для избранного
 const { favorites, remove } = useFavorites()
 
+// Вычисляемый список избранных изображений
 const favoriteImages = computed(() =>
 	images.filter(img => favorites.value.includes(img.id))
 )
 
+// Функция для удаления изображения из избранного
 function removeFromFavorites(id) {
 	remove(id)
 }
 </script>
 
 <template>
-	<div class="page space-y-4">
-		<h1 class="page-title">Избранное</h1>
+	<!-- Страница избранных изображений -->
+	<div class="p-5 max-w-4xl mx-auto pb-20 space-y-4">
+		<h1 class="text-2xl font-semibold text-gray-100">Избранное</h1>
 
+		<!-- Сетка избранных изображений -->
 		<div
 			v-if="favoriteImages.length"
 			class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4"
@@ -25,36 +31,22 @@ function removeFromFavorites(id) {
 			<div
 				v-for="image in favoriteImages"
 				:key="image.id"
-				class="image-tile h-64"
+				class="relative overflow-hidden rounded-lg border border-gray-600 h-64"
 			>
-				<img :src="`/images/${image.src}`" :alt="image.title" />
-				<div class="absolute top-2 right-2 flex gap-1">
+				<img
+					:src="image.src"
+					:alt="image.title"
+					class="w-full h-full object-cover"
+				/>
+				<!-- Кнопка удаления из избранного -->
+				<div class="absolute top-2 right-2">
 					<button
-						class="icon-btn"
-						@click="shareImage(image)"
-						aria-label="Поделиться"
-					>
-						<svg
-							class="w-4 h-4 text-white/70"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
-							></path>
-						</svg>
-					</button>
-					<button
-						class="icon-btn icon-btn--danger"
+						class="w-8 h-8 bg-gray-800 rounded-full hover:bg-gray-700 flex items-center justify-center"
 						@click="removeFromFavorites(image.id)"
 						aria-label="Удалить из избранного"
 					>
 						<svg
-							class="w-4 h-4 text-white"
+							class="w-4 h-4 text-gray-300"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -68,12 +60,16 @@ function removeFromFavorites(id) {
 						</svg>
 					</button>
 				</div>
-				<div class="image-caption">
-					<p>{{ image.title }}</p>
+				<!-- Подпись изображения -->
+				<div
+					class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3"
+				>
+					<p class="text-white text-sm text-center">{{ image.title }}</p>
 				</div>
 			</div>
 		</div>
 
-		<div v-else class="text-center muted">Избранное пусто</div>
+		<!-- Сообщение, если избранное пусто -->
+		<div v-else class="text-center text-gray-400">Избранное пусто</div>
 	</div>
 </template>
