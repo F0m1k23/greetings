@@ -1,32 +1,44 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
+import images from '@/data/images'
+import texts from '@/data/texts'
+import { textStyles } from '@/data/textStyles'
+import { frames } from '@/data/frames'
 import { useGreetingCanvas } from '@/composables/useGreetingCanvas'
 
 const canvasRef = ref(null)
+const uiState = ref('editor') // editor | sending | done
 const loading = ref(false)
 const error = ref('')
-const uiState = ref('editor') // editor | sending | done
+
+const selectedImage = ref(images[0])
+const selectedText = ref('')
+const selectedStyle = ref('classic')
+const selectedFrame = ref('none')
+const fontSize = ref(36)
 
 const { draw, toBlob } = useGreetingCanvas(canvasRef, 1080, 1350)
 
-// пример данных (у тебя они уже есть)
-const imageSrc = ref('/demo.jpg')
-const text = ref('С Новым годом!')
-const fontSize = ref(36)
+const presetTexts = computed(() => {
+	return texts[selectedImage.value.categoryId] || []
+})
 
-onMounted(render)
-watch([text, fontSize], render)
+onMounted(() => {
+	selectedText.value = presetTexts.value[0] || ''
+	render()
+})
+
+watch(
+	[selectedImage, selectedText, selectedStyle, selectedFrame, fontSize],
+	render
+)
 
 function render() {
 	draw({
-		imageSrc: imageSrc.value,
-		text: text.value,
-		textStyle: {
-			font: size => `bold ${size}px serif`,
-			color: '#ffffff',
-			shadow: { color: 'rgba(0,0,0,.6)', blur: 6, x: 2, y: 2 },
-		},
-		frame: null,
+		imageSrc: selectedImage.value.src,
+		text: selectedText.value,
+		textStyle: textStyles[selectedStyle.value],
+		frame: frames[selectedFrame.value],
 		fontSize: fontSize.value,
 	})
 }
@@ -35,7 +47,7 @@ async function sendGreeting() {
 	error.value = ''
 
 	if (!window.Telegram?.WebApp) {
-		error.value = 'Откройте приложение через Telegram'
+		error.value = 'Откройте через Telegram'
 		return
 	}
 
@@ -57,19 +69,16 @@ async function sendGreeting() {
 		if (!response.ok) throw new Error('Upload failed')
 
 		const { imageId } = await response.json()
-		if (!imageId) throw new Error('Invalid server response')
+		if (!imageId) throw new Error('Invalid response')
 
 		window.Telegram.WebApp.sendData(
 			JSON.stringify({ type: 'image_uploaded', imageId })
 		)
 
 		uiState.value = 'done'
-
-		setTimeout(() => {
-			window.Telegram.WebApp.close()
-		}, 1200)
+		setTimeout(() => window.Telegram.WebApp.close(), 1200)
 	} catch (e) {
-		error.value = e.message || 'Ошибка отправки'
+		error.value = e.message
 		uiState.value = 'editor'
 	} finally {
 		loading.value = false
@@ -79,7 +88,6 @@ async function sendGreeting() {
 
 <template>
 	<div class="min-h-screen bg-gray-900 text-white p-4">
-		<!-- EDITOR -->
 		<div v-if="uiState === 'editor'" class="space-y-4">
 			<canvas
 				ref="canvasRef"
@@ -88,10 +96,34 @@ async function sendGreeting() {
 				class="w-full rounded-lg border border-gray-700"
 			/>
 
-			<textarea v-model="text" class="w-full p-2 bg-gray-800 rounded" />
+			<select v-model="selectedImage" class="w-full p-2 bg-gray-800 rounded">
+				<option v-for="img in images" :key="img.id" :value="img">
+					{{ img.title }}
+				</option>
+			</select>
+
+			<select v-model="selectedText" class="w-full p-2 bg-gray-800 rounded">
+				<option v-for="(t, i) in presetTexts" :key="i" :value="t">
+					{{ t }}
+				</option>
+			</select>
+
+			<select v-model="selectedStyle" class="w-full p-2 bg-gray-800 rounded">
+				<option v-for="(s, key) in textStyles" :key="key" :value="key">
+					{{ s.label }}
+				</option>
+			</select>
+
+			<select v-model="selectedFrame" class="w-full p-2 bg-gray-800 rounded">
+				<option v-for="(f, key) in frames" :key="key" :value="key">
+					{{ f.label }}
+				</option>
+			</select>
+
+			<input type="range" min="20" max="64" v-model.number="fontSize" />
 
 			<button
-				class="w-full bg-indigo-600 py-3 rounded disabled:opacity-50"
+				class="w-full bg-indigo-600 py-3 rounded"
 				:disabled="loading"
 				@click="sendGreeting"
 			>
@@ -101,7 +133,6 @@ async function sendGreeting() {
 			<p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
 		</div>
 
-		<!-- DONE -->
 		<div v-if="uiState === 'done'" class="text-center py-24">
 			<div class="text-5xl mb-4">✅</div>
 			<p class="text-lg font-semibold">Открытка создана</p>
