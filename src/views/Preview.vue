@@ -98,7 +98,9 @@ const selectedFrame = ref('none')
 const fontSize = ref(36)
 // fixed preview display width for no-scroll, standard postcard size (~500px)
 const previewWidth = ref(540)
-const previewHeight = computed(() => Math.round((1350 * previewWidth.value) / 1080))
+const previewHeight = computed(() =>
+	Math.round((1350 * previewWidth.value) / 1080)
+)
 
 // ===== computed text =====
 const finalText = computed(() =>
@@ -217,13 +219,25 @@ async function downloadPreview() {
 						</div>
 					</div>
 
-					<div class="rounded-lg border border-gray-800 bg-black p-3 flex justify-center">
-						<div :style="{ width: previewWidth + 'px', height: previewHeight + 'px' }" class="overflow-hidden rounded-md border border-gray-700 bg-black">
+					<div
+						class="rounded-lg border border-gray-800 bg-black p-3 flex justify-center"
+					>
+						<div
+							:style="{
+								width: previewWidth + 'px',
+								height: previewHeight + 'px',
+							}"
+							class="overflow-hidden rounded-md border border-gray-700 bg-black"
+						>
 							<canvas
 								ref="canvasRef"
 								width="1080"
 								height="1350"
-								:style="{ width: previewWidth + 'px', height: previewHeight + 'px', display: 'block' }"
+								:style="{
+									width: previewWidth + 'px',
+									height: previewHeight + 'px',
+									display: 'block',
+								}"
 							/>
 						</div>
 					</div>
