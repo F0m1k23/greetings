@@ -120,12 +120,27 @@ async function send() {
 		const blob = await toBlob()
 
 		if (window.Telegram?.WebApp) {
-			// здесь дальше твоя реальная отправка
-			console.log('Готово к отправке в Telegram', blob)
-			show('Готово к отправке')
+			// Конвертируем blob в base64
+			const reader = new FileReader()
+			reader.onload = function () {
+				const base64 = reader.result
+				// Отправляем данные в бота
+				window.Telegram.WebApp.sendData(
+					JSON.stringify({
+						type: 'greeting_card',
+						image: base64,
+						timestamp: Date.now(),
+					})
+				)
+				show('Открытка отправлена!')
+			}
+			reader.readAsDataURL(blob)
 		} else {
-			show('Откройте через Telegram')
+			show('Откройте приложение через Telegram')
 		}
+	} catch (error) {
+		console.error('Ошибка отправки:', error)
+		show('Ошибка при отправке')
 	} finally {
 		loading.value = false
 	}

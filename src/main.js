@@ -43,6 +43,20 @@ if (CanvasRenderingContext2D && !CanvasRenderingContext2D.prototype.roundRect) {
 if (window.Telegram?.WebApp) {
 	window.Telegram.WebApp.ready()
 	window.Telegram.WebApp.expand()
+
+	// Настройка темы
+	window.Telegram.WebApp.setHeaderColor('#0d1117')
+	window.Telegram.WebApp.setBackgroundColor('#0d1117')
+
+	// Обработка закрытия
+	window.Telegram.WebApp.onEvent('viewportChanged', () => {
+		// Адаптация под изменения viewport
+	})
+
+	// Обработка отправки данных
+	window.Telegram.WebApp.onEvent('mainButtonClicked', () => {
+		// Основная кнопка Telegram (если используется)
+	})
 }
 
 createApp(App).use(router).mount('#app')
