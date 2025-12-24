@@ -7,7 +7,7 @@
 		<div
 			class="w-12 h-12 bg-gray-600 text-gray-100 rounded-lg flex items-center justify-center mb-3"
 		>
-			<span class="text-xl">✦</span>
+			<span class="text-xl">{{ card.icon || '✦' }}</span>
 		</div>
 
 		<h3 class="text-lg font-medium text-gray-100">

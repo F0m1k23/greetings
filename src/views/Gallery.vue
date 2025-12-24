@@ -1,13 +1,16 @@
 <template>
 	<!-- Страница галереи изображений категории -->
-	<div class="p-5 max-w-4xl mx-auto pb-20 space-y-4">
-		<!-- Кнопка назад -->
-		<button
-			class="text-gray-400 hover:text-gray-200 mb-4"
-			@click="$router.back()"
-		>
-			← Назад
-		</button>
+	<div
+		class="min-h-screen bg-gray-900 text-white p-5 max-w-4xl mx-auto pb-20 space-y-4"
+	>
+		<div class="flex items-center gap-4 mb-6">
+			<button
+				@click="$router.back()"
+				class="text-gray-400 hover:text-white transition-colors"
+			>
+				<i class="fas fa-arrow-left text-xl"></i>
+			</button>
+		</div>
 
 		<!-- Контент категории -->
 		<div v-if="card">
@@ -20,11 +23,11 @@
 				<div
 					v-for="image in categoryImages"
 					:key="image.id"
-					class="relative overflow-hidden rounded-lg border border-gray-600 cursor-pointer h-64"
+					class="relative overflow-hidden rounded-lg border border-gray-600 cursor-pointer h-64 hover:border-gray-400 transition-colors"
 					@click="openPreview(image.id)"
 				>
 					<img
-						:src="image.src"
+						:src="image.preview || image.src"
 						:alt="image.title"
 						class="w-full h-full object-cover hover:scale-105 transition-transform"
 						loading="lazy"
@@ -52,7 +55,7 @@ import { computed } from 'vue'
 
 // Импорты данных и composables
 import cards from '@/data/cards'
-import images from '@/data/images'
+import readyCards from '@/data/readyCards'
 import { useFavorites } from '@/composables/useFavorites'
 
 // Инициализация роутера и избранного
@@ -63,16 +66,16 @@ const { isFavorite, toggle } = useFavorites()
 // Вычисляемая текущая категория на основе ID из параметров роута
 const card = computed(() => cards.find(c => c.id === Number(route.params.id)))
 
-// Вычисляемый список изображений для текущей категории
+// Вычисляемый список готовых открыток для текущей категории
 const categoryImages = computed(() =>
-	images.filter(img => img.categoryId === card.value?.id)
+	readyCards.filter(item => item.categoryId === card.value?.id)
 )
 
-// Функция для открытия превью изображения
-function openPreview(imageId) {
+// Функция для открытия превью готовой открытки
+function openPreview(cardId) {
 	router.push({
 		name: 'preview',
-		query: { imageId },
+		query: { cardId, type: 'ready' },
 	})
 }
 </script>
