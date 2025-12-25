@@ -174,10 +174,48 @@ export function useCanvas() {
 	}
 
 	function download() {
-		const link = document.createElement('a')
-		link.href = canvasRef.value.toDataURL('image/png')
-		link.download = 'postcard.png'
-		link.click()
+		const dataUrl = canvasRef.value.toDataURL('image/png')
+
+		// Если в Telegram Web App, используем Telegram API
+		if (window.Telegram?.WebApp) {
+			// Показываем изображение пользователю для сохранения
+			window.Telegram.WebApp.showPopup({
+				title: 'Открытка готова!',
+				message: 'Длинное нажатие на изображение ниже для сохранения',
+				buttons: [
+					{
+						type: 'default',
+						text: 'OK',
+					},
+				],
+			})
+
+			// Создаем временное изображение для показа
+			const img = new Image()
+			img.src = dataUrl
+			img.style.maxWidth = '100%'
+			img.style.height = 'auto'
+
+			// Показываем в alert или popup
+			setTimeout(() => {
+				alert(
+					'Изображение готово! Используйте функцию "Сохранить изображение" вашего браузера.'
+				)
+			}, 100)
+		} else {
+			// Для обычного браузера
+			try {
+				const link = document.createElement('a')
+				link.href = dataUrl
+				link.download = 'postcard.png'
+				document.body.appendChild(link)
+				link.click()
+				document.body.removeChild(link)
+			} catch (error) {
+				// Fallback: открыть в новой вкладке
+				window.open(dataUrl, '_blank')
+			}
+		}
 	}
 
 	async function sendToTelegram() {
@@ -191,35 +229,64 @@ export function useCanvas() {
 				)
 			})
 
-			const formData = new FormData()
-			formData.append('image', blob, 'postcard.png')
+			// Если в Telegram Web App, используем Telegram API
+			if (window.Telegram?.WebApp) {
+				const file = new File([blob], 'postcard.png', { type: 'image/png' })
 
-			const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-				method: 'POST',
-				body: formData,
-			})
+				// Отправляем файл через Telegram Web App
+				window.Telegram.WebApp.sendData(
+					JSON.stringify({
+						action: 'send_postcard',
+						file: await blobToBase64(blob),
+					})
+				)
 
-			if (!uploadRes.ok) throw new Error('Ошибка загрузки изображения')
+				return true
+			} else {
+				// Fallback для веб-версии
+				const formData = new FormData()
+				formData.append('image', blob, 'postcard.png')
 
-			const { imageId } = await uploadRes.json()
+				const uploadRes = await fetch(
+					`${import.meta.env.VITE_API_URL}/upload`,
+					{
+						method: 'POST',
+						body: formData,
+					}
+				)
 
-			const sendRes = await fetch(`${import.meta.env.VITE_API_URL}/send`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					chatId: import.meta.env.VITE_BOT_CHAT_ID,
-					imageId,
-				}),
-			})
+				if (!uploadRes.ok) throw new Error('Ошибка загрузки изображения')
 
-			if (!sendRes.ok) throw new Error('Ошибка отправки')
+				const { imageId } = await uploadRes.json()
 
-			return true
+				const sendRes = await fetch(`${import.meta.env.VITE_API_URL}/send`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						chatId: import.meta.env.VITE_BOT_CHAT_ID,
+						imageId,
+					}),
+				})
+
+				if (!sendRes.ok) throw new Error('Ошибка отправки')
+
+				return true
+			}
 		} catch (error) {
 			throw error
 		} finally {
 			sending.value = false
 		}
+	}
+
+	// Helper function to convert blob to base64
+	function blobToBase64(blob) {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader()
+			reader.onload = () => resolve(reader.result)
+			reader.onerror = reject
+			reader.readAsDataURL(blob)
+		})
 	}
 
 	return {

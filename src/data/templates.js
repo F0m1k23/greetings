@@ -3,7 +3,7 @@ export const templates = {
 		{
 			id: 'ny-1',
 			image:
-				'https://images.unsplash.com/photo-1608889175123-8ee3b6c04b8f?w=800&q=80',
+				'https://images.unsplash.com/photo-1512911122913-094837b6fd2f?w=800&q=80',
 		},
 		{
 			id: 'ny-2',
