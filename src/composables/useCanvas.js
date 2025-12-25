@@ -18,6 +18,7 @@ export function useCanvas() {
 	const textColor = ref('#ffffff')
 	const textStroke = ref(true)
 	const textBox = ref('soft')
+	const textStyle = ref('normal')
 	const selectedFrame = ref(null)
 	const activeTab = ref('general')
 	const sending = ref(false)
@@ -37,8 +38,8 @@ export function useCanvas() {
 	// Init
 	function initCanvas() {
 		const canvas = canvasRef.value
-		canvas.width = 800
-		canvas.height = 1000
+		canvas.width = 1080
+		canvas.height = 1350
 		ctx = canvas.getContext('2d')
 	}
 
@@ -66,28 +67,42 @@ export function useCanvas() {
 	function draw() {
 		if (!image.value) return
 
-		ctx.clearRect(0, 0, 800, 1000)
-		ctx.drawImage(image.value, 0, 0, 800, 1000)
+		ctx.clearRect(0, 0, 1080, 1350)
+		ctx.drawImage(image.value, 0, 0, 1080, 1350)
 
-		ctx.font = `bold ${textSizeNum.value}px sans-serif`
+		// Apply text style with proper size
+		const styleMap = {
+			normal: `bold ${textSizeNum.value}px sans-serif`,
+			bold: `bold ${textSizeNum.value}px sans-serif`,
+			italic: `italic ${textSizeNum.value}px sans-serif`,
+			serif: `normal ${textSizeNum.value}px Georgia, serif`,
+			cursive: `normal ${textSizeNum.value}px cursive`,
+			fantasy: `bold ${textSizeNum.value}px fantasy`,
+			elegant: `italic ${textSizeNum.value}px 'Times New Roman', serif`,
+			modern: `bold ${textSizeNum.value}px sans-serif`,
+			vintage: `normal ${textSizeNum.value}px Georgia, serif`,
+			luxury: `bold italic ${textSizeNum.value}px 'Times New Roman', serif`,
+		}
+
+		ctx.font = styleMap[textStyle.value] || styleMap.normal
 		ctx.textAlign = 'center'
 		ctx.textBaseline = 'top'
 
-		const padding = 60
-		const maxWidth = 800 - padding * 2
+		const padding = 80
+		const maxWidth = 1080 - padding * 2
 		const lineHeight = textSizeNum.value + 12
 
 		const lines = calculateLines(text.value, maxWidth)
 		const blockHeight = lines.length * lineHeight
 
-		let startY = 1000 - blockHeight - 80
-		if (textPosition.value === 'top') startY = 80
-		if (textPosition.value === 'center') startY = (1000 - blockHeight) / 2
+		let startY = 1350 - blockHeight - 120
+		if (textPosition.value === 'top') startY = 120
+		if (textPosition.value === 'center') startY = (1350 - blockHeight) / 2
 
 		// TEXT BOX
 		if (textBox.value !== 'none') {
-			const boxPad = 28
-			const boxX = padding - boxPad
+			const boxPad = 40
+			const boxX = 540 - maxWidth / 2 - boxPad
 			const boxY = startY - boxPad
 			const boxW = maxWidth + boxPad * 2
 			const boxH = blockHeight + boxPad * 2
@@ -114,8 +129,8 @@ export function useCanvas() {
 
 		lines.forEach((line, i) => {
 			const y = startY + i * lineHeight
-			if (textStroke.value) ctx.strokeText(line, 400, y)
-			ctx.fillText(line, 400, y)
+			if (textStroke.value) ctx.strokeText(line, 540, y)
+			ctx.fillText(line, 540, y)
 		})
 
 		// FRAME
@@ -165,6 +180,11 @@ export function useCanvas() {
 
 	function setTextBox(type) {
 		textBox.value = type
+		debouncedDraw()
+	}
+
+	function setTextStyle(style) {
+		textStyle.value = style
 		debouncedDraw()
 	}
 
@@ -266,6 +286,7 @@ export function useCanvas() {
 		textColor,
 		textStroke,
 		textBox,
+		textStyle,
 		selectedFrame,
 		activeTab,
 		sending,
@@ -277,6 +298,7 @@ export function useCanvas() {
 		selectImage,
 		setPosition,
 		setTextBox,
+		setTextStyle,
 		selectFrame,
 		download,
 		sendToTelegram,

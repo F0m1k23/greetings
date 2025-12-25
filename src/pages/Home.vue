@@ -28,7 +28,7 @@
 
 		<!-- Подвал -->
 		<footer class="p-6 text-center">
-			<p class="text-sm text-gray-500">Бесплатно · Без регистрации · Просто</p>
+			<p class="text-sm text-gray-500">Без регистрации · Просто · Для всех</p>
 		</footer>
 	</div>
 </template>

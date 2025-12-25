@@ -80,6 +80,14 @@
 						>
 							<option value="newyear">🎄 Новый год</option>
 							<option value="birthday">🎂 День рождения</option>
+							<option value="valentines">❤️ День святого Валентина</option>
+							<option value="womensday">🌸 8 Марта</option>
+							<option value="mensday">🛡️ 23 Февраля</option>
+							<option value="mothersday">🌷 День матери</option>
+							<option value="fathersday">🎖️ День отца</option>
+							<option value="christmas">🎄 Рождество</option>
+							<option value="graduation">🎓 Выпускной</option>
+							<option value="wedding">💍 Свадьба</option>
 							<option value="universal">🎁 Универсальные</option>
 						</select>
 					</div>
@@ -270,6 +278,32 @@
 							</button>
 						</div>
 					</div>
+
+					<div class="bg-white rounded-xl p-4 shadow-sm">
+						<label class="block text-sm font-medium text-gray-700 mb-2">
+							Стиль текста
+						</label>
+						<div class="grid grid-cols-3 gap-2">
+							<button
+								v-for="style in textStyles"
+								:key="style.id"
+								:class="[
+									'py-2 px-3 rounded-lg text-sm font-medium transition-all',
+									textStyle === style.id
+										? 'bg-blue-600 text-white'
+										: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+								]"
+								@click="setTextStyle(style.id)"
+								:style="{
+									fontFamily: style.fontFamily,
+									fontWeight: style.fontWeight,
+									fontStyle: style.fontStyle,
+								}"
+							>
+								{{ style.title }}
+							</button>
+						</div>
+					</div>
 				</div>
 
 				<!-- FRAME TAB -->
@@ -293,9 +327,6 @@
 							>
 								<div class="text-center">
 									<div class="font-medium mb-1">{{ frame.title }}</div>
-									<div class="text-xs text-gray-500">
-										{{ frame.pro ? 'PRO' : 'Бесплатно' }}
-									</div>
 								</div>
 							</button>
 						</div>
@@ -329,6 +360,7 @@ import { onMounted, watch } from 'vue'
 import { templates } from '@/data/templates'
 import { editorTexts } from '@/data/editorTexts'
 import frames from '@/data/editorFrames'
+import textStyles from '@/data/textStyles'
 import { toast } from 'vue3-toastify'
 import { useCanvas } from '@/composables/useCanvas'
 
@@ -348,6 +380,7 @@ const {
 	textColor,
 	textStroke,
 	textBox,
+	textStyle,
 	selectedFrame,
 	activeTab,
 	sending,
@@ -358,6 +391,7 @@ const {
 	selectImage,
 	setPosition,
 	setTextBox,
+	setTextStyle,
 	selectFrame,
 	download,
 	sendToTelegram,
