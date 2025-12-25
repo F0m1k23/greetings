@@ -1,44 +1,37 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import Home from '@/pages/Home.vue'
-import Holidays from '@/pages/Holidays.vue'
-import Gallery from '@/pages/Gallery.vue'
-import Preview from '@/pages/Preview.vue'
-import Editor from '@/pages/Editor.vue'
-import Favorites from '@/pages/Favorites.vue'
-
 const routes = [
 	{
 		path: '/',
 		name: 'Home',
-		component: Home,
+		component: () => import('@/pages/Home.vue'),
 	},
 	{
 		path: '/holidays',
 		name: 'Holidays',
-		component: Holidays,
+		component: () => import('@/pages/Holidays.vue'),
 	},
 	{
 		path: '/gallery/:holiday',
 		name: 'Gallery',
-		component: Gallery,
+		component: () => import('@/pages/Gallery.vue'),
 		props: true,
 	},
 	{
 		path: '/preview/:holiday/:id',
 		name: 'Preview',
-		component: Preview,
+		component: () => import('@/pages/Preview.vue'),
 		props: true,
 	},
 	{
 		path: '/editor',
 		name: 'Editor',
-		component: Editor,
+		component: () => import('@/pages/Editor.vue'),
 	},
 	{
 		path: '/favorites',
 		name: 'Favorites',
-		component: Favorites,
+		component: () => import('@/pages/Favorites.vue'),
 	},
 ]
 

@@ -1,0 +1,16 @@
+{
+	"name": "Генератор открыток",
+	"short_name": "Открытки",
+	"description": "Создавайте красивые поздравительные открытки онлайн",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#3b82f6",
+	"icons": [
+		{
+			"src": "/vite.svg",
+			"sizes": "any",
+			"type": "image/svg+xml"
+		}
+	]
+}

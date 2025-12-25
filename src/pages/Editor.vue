@@ -10,13 +10,21 @@
 		<!-- PREVIEW -->
 		<div class="p-4 bg-white">
 			<div
-				class="max-w-sm mx-auto bg-gray-100 rounded-2xl shadow-lg overflow-hidden"
+				class="max-w-sm mx-auto bg-gray-100 rounded-2xl shadow-lg overflow-hidden relative"
 			>
 				<div class="p-4 bg-gray-200">
 					<canvas
 						ref="canvasRef"
 						class="w-full rounded-xl bg-gray-300"
 					></canvas>
+					<div
+						v-if="loadingImage"
+						class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-xl"
+					>
+						<div
+							class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"
+						></div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -69,7 +77,6 @@
 						<select
 							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer"
 							v-model="holiday"
-							@change="onHolidayChange"
 						>
 							<option value="newyear">🎄 Новый год</option>
 							<option value="birthday">🎂 День рождения</option>
@@ -84,6 +91,7 @@
 								v-for="img in (images || []).filter(img => img && img.image)"
 								:key="img.id"
 								class="flex-shrink-0"
+								v-memo="[img.image, selectedImageSrc]"
 							>
 								<img
 									:src="img.image"
@@ -109,7 +117,7 @@
 						<select
 							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer mb-3"
 							v-model="textMode"
-							@change="draw"
+							@change="debouncedDraw"
 						>
 							<option value="preset">Готовый текст</option>
 							<option value="custom">Свой текст</option>
@@ -119,7 +127,7 @@
 							v-if="textMode === 'preset'"
 							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer"
 							v-model="text"
-							@change="draw"
+							@change="debouncedDraw"
 						>
 							<option v-for="t in texts" :key="t" :value="t">
 								{{ t }}
@@ -132,7 +140,7 @@
 							rows="4"
 							placeholder="Введите свой текст"
 							v-model="text"
-							@input="draw"
+							@input="debouncedDraw"
 						></textarea>
 					</div>
 
@@ -146,7 +154,7 @@
 							max="72"
 							v-model="textSize"
 							class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-							@input="draw"
+							@input="debouncedDraw"
 						/>
 						<div class="text-sm text-center mt-1 text-gray-600">
 							{{ textSizeNum }}px
@@ -202,7 +210,7 @@
 							type="color"
 							v-model="textColor"
 							class="w-full h-12 rounded-lg border-2 border-gray-300 cursor-pointer"
-							@input="draw"
+							@input="debouncedDraw"
 						/>
 					</div>
 
@@ -214,7 +222,7 @@
 								type="checkbox"
 								class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
 								v-model="textStroke"
-								@change="draw"
+								@change="debouncedDraw"
 							/>
 							<span class="text-sm font-medium text-gray-700"
 								>Мягкая обводка текста</span
@@ -270,7 +278,7 @@
 						<p class="text-sm font-medium text-gray-700 mb-3">Выберите рамку</p>
 						<div class="grid grid-cols-2 gap-3">
 							<button
-								v-for="frame in (frames || []).filter(
+								v-for="frame in (framesData || []).filter(
 									frame => frame && frame.id
 								)"
 								:key="frame.id"
@@ -300,307 +308,84 @@
 		<div class="bg-white p-4 border-t border-gray-200">
 			<div class="flex space-x-3 max-w-sm mx-auto">
 				<button
-					@click="download"
+					@click="handleDownload"
 					class="flex-1 py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
 				>
 					⬇️ Скачать
 				</button>
 				<button
-					@click="openSendModal"
+					@click="handleSendToTelegram"
 					class="flex-1 py-3 px-6 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 cursor-pointer"
 				>
 					📤 Отправить
 				</button>
 			</div>
 		</div>
-
-		<!-- SEND MODAL -->
-		<div
-			v-if="showSendModal"
-			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-			style="z-index: 9999 !important"
-		>
-			<div class="bg-white rounded-2xl p-6 w-full max-w-sm mx-auto">
-				<h3 class="text-lg font-semibold text-gray-800 mb-4">
-					Отправить открытку
-				</h3>
-				<div class="space-y-4">
-					<div>
-						<label class="block text-sm font-medium text-gray-700 mb-2">
-							Получатель
-						</label>
-						<button
-							@click="selectTelegramContact"
-							class="w-full p-3 border border-gray-300 rounded-lg text-left hover:bg-gray-50 transition-colors"
-						>
-							{{ recipient || 'Выбрать контакт из Telegram' }}
-						</button>
-					</div>
-					<div class="flex space-x-3">
-						<button
-							@click="showSendModal = false"
-							class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors duration-200"
-						>
-							Отмена
-						</button>
-						<button
-							@click="sendToTelegram"
-							:disabled="!recipient.trim() || sending"
-							class="flex-1 py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							{{ sending ? 'Отправка...' : 'Отправить' }}
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
 	</div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue'
+import { onMounted, watch } from 'vue'
 import { templates } from '@/data/templates'
 import { editorTexts } from '@/data/editorTexts'
 import frames from '@/data/editorFrames'
 import { toast } from 'vue3-toastify'
+import { useCanvas } from '@/composables/useCanvas'
 
-const canvasRef = ref(null)
-let ctx
+const framesData = frames
 
-// ===== STATE =====
-const holiday = ref('newyear')
-const images = ref([])
-const texts = ref([])
-
-const selectedImageSrc = ref('')
-const image = ref(null)
-
-const textMode = ref('preset')
-const text = ref('')
-const textSize = ref(36)
-const textSizeNum = computed(() => Number(textSize.value))
-const textPosition = ref('bottom')
-const textColor = ref('#ffffff')
-const textStroke = ref(true)
-const textBox = ref('soft')
-const selectedFrame = ref(null)
-const activeTab = ref('general')
-const showSendModal = ref(false)
-const recipient = ref('')
-const sending = ref(false)
-
-const selectTelegramContact = () => {
-	if (window.Telegram && window.Telegram.WebApp) {
-		window.Telegram.WebApp.requestContact(contact => {
-			if (contact) {
-				recipient.value = contact.id.toString()
-			}
-		})
-	} else {
-		toast.info('Откройте в Telegram для выбора контакта')
-	}
-}
+const {
+	canvasRef,
+	holiday,
+	images,
+	texts,
+	selectedImageSrc,
+	textMode,
+	text,
+	textSize,
+	textSizeNum,
+	textPosition,
+	textColor,
+	textStroke,
+	textBox,
+	selectedFrame,
+	activeTab,
+	sending,
+	loadingImage,
+	initCanvas,
+	debouncedDraw,
+	onHolidayChange,
+	selectImage,
+	setPosition,
+	setTextBox,
+	selectFrame,
+	download,
+	sendToTelegram,
+} = useCanvas()
 
 // ===== INIT =====
 onMounted(() => {
-	const canvas = canvasRef.value
-	canvas.width = 800
-	canvas.height = 1000
-	ctx = canvas.getContext('2d')
-	onHolidayChange()
+	initCanvas()
+	onHolidayChange(templates, editorTexts, frames)
 })
 
 // ===== WATCH =====
-watch([textSize, textPosition], draw)
-
-// ===== HELPERS =====
-function calculateLines(ctx, text, maxWidth) {
-	const words = text.split(' ')
-	let line = ''
-	const lines = []
-
-	for (let w of words) {
-		const test = line + w + ' '
-		if (ctx.measureText(test).width > maxWidth && line) {
-			lines.push(line.trim())
-			line = w + ' '
-		} else {
-			line = test
-		}
-	}
-
-	if (line) lines.push(line.trim())
-	return lines
-}
-
-// ===== DRAW =====
-function draw() {
-	if (!image.value) return
-
-	ctx.clearRect(0, 0, 800, 1000)
-	ctx.drawImage(image.value, 0, 0, 800, 1000)
-
-	ctx.font = `bold ${textSizeNum.value}px sans-serif`
-	ctx.textAlign = 'center'
-	ctx.textBaseline = 'top'
-
-	const padding = 60
-	const maxWidth = 800 - padding * 2
-	const lineHeight = textSizeNum.value + 12
-
-	const lines = calculateLines(ctx, text.value, maxWidth)
-	const blockHeight = lines.length * lineHeight
-
-	let startY = 1000 - blockHeight - 80
-	if (textPosition.value === 'top') startY = 80
-	if (textPosition.value === 'center') startY = (1000 - blockHeight) / 2
-
-	// TEXT BOX
-	if (textBox.value !== 'none') {
-		const boxPad = 28
-		const boxX = padding - boxPad
-		const boxY = startY - boxPad
-		const boxW = maxWidth + boxPad * 2
-		const boxH = blockHeight + boxPad * 2
-
-		if (textBox.value === 'soft') {
-			ctx.fillStyle = 'rgba(0,0,0,0.35)'
-			ctx.fillRect(boxX, boxY, boxW, boxH)
-		}
-
-		if (textBox.value === 'border') {
-			ctx.strokeStyle = 'rgba(255,255,255,0.6)'
-			ctx.lineWidth = 2
-			ctx.strokeRect(boxX, boxY, boxW, boxH)
-		}
-	}
-
-	// TEXT
-	ctx.fillStyle = textColor.value
-
-	if (textStroke.value) {
-		ctx.strokeStyle = 'rgba(0,0,0,0.45)'
-		ctx.lineWidth = Math.max(2, textSizeNum.value / 14)
-	}
-
-	lines.forEach((line, i) => {
-		const y = startY + i * lineHeight
-		if (textStroke.value) ctx.strokeText(line, 400, y)
-		ctx.fillText(line, 400, y)
-	})
-
-	// FRAME
-	if (selectedFrame.value) {
-		selectedFrame.value.draw(ctx)
-	}
-}
+watch(holiday, () => onHolidayChange(templates, editorTexts, frames))
 
 // ===== ACTIONS =====
-function onHolidayChange() {
-	images.value = (templates[holiday.value] || templates.universal || []).filter(
-		Boolean
-	)
-	texts.value = editorTexts[holiday.value] || editorTexts.universal || []
-	text.value = texts.value[0] || ''
-	selectImage(images.value[0]?.image)
-
-	// Initialize selectedFrame if not set
-	if (!selectedFrame.value && frames.length > 0) {
-		selectedFrame.value = frames[0]
-	}
-}
-
-function selectImage(src) {
-	if (!src) return
-	selectedImageSrc.value = src
-	const img = new Image()
-	img.crossOrigin = 'anonymous'
-	img.src = src
-	img.onload = () => {
-		image.value = img
-		draw()
-	}
-}
-
-function setPosition(pos) {
-	textPosition.value = pos
-	draw()
-}
-
-function setTextBox(type) {
-	textBox.value = type
-	draw()
-}
-
-function selectFrame(frame) {
-	selectedFrame.value = frame
-	draw()
-}
-
-function download() {
-	const link = document.createElement('a')
-	link.href = canvasRef.value.toDataURL('image/png')
-	link.download = 'postcard.png'
-	link.click()
+function handleDownload() {
+	download()
 	toast.success('Открытка успешно скачана!')
 }
 
-function openSendModal() {
-	console.log('openSendModal called')
-	showSendModal.value = true
-	recipient.value = ''
-}
-
-async function sendToTelegram() {
-	console.log('recipient:', recipient.value)
-
-	console.log('API URL:', import.meta.env.VITE_API_URL)
-
-	if (!recipient.value.trim()) return
-
-	sending.value = true
-
+async function handleSendToTelegram() {
 	try {
-		const blob = await new Promise((resolve, reject) => {
-			canvasRef.value.toBlob(
-				b => (b ? resolve(b) : reject(new Error('Blob generation failed'))),
-				'image/png'
-			)
-		})
-
-		const formData = new FormData()
-		formData.append('image', blob, 'postcard.png')
-
-		const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-			method: 'POST',
-			body: formData,
-		})
-
-		if (!uploadRes.ok) {
-			throw new Error('Ошибка загрузки изображения')
-		}
-
-		const { imageId } = await uploadRes.json()
-
-		const sendRes = await fetch(`${import.meta.env.VITE_API_URL}/send`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				chatId: recipient.value,
-				imageId,
-			}),
-		})
-
-		if (!sendRes.ok) {
-			throw new Error('Ошибка отправки')
-		}
-
-		toast.success('Открытка отправлена!')
-		showSendModal.value = false
+		await sendToTelegram()
+		toast.success(
+			'Открытка отправлена в бот! Перешлите её кому угодно из бота.'
+		)
 	} catch (error) {
 		toast.error('Ошибка отправки: ' + error.message)
-	} finally {
-		sending.value = false
 	}
 }
 </script>

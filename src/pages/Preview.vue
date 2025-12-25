@@ -19,11 +19,11 @@
 			<!-- КНОПКИ -->
 			<div class="space-y-3">
 				<button
-					@click="openSendModal"
-					:disabled="!card"
+					@click="sendToTelegram"
+					:disabled="!card || sending"
 					class="w-full py-4 px-6 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 				>
-					📤 Отправить
+					{{ sending ? 'Отправка...' : '📤 Отправить' }}
 				</button>
 
 				<button
@@ -42,47 +42,6 @@
 					{{ isFav ? '⭐ Убрать из избранного' : '⭐ В избранное' }}
 				</button>
 			</div>
-
-			<!-- SEND MODAL -->
-			<div
-				v-if="showSendModal"
-				class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-				style="z-index: 9999 !important"
-			>
-				<div class="bg-white rounded-2xl p-6 w-full max-w-sm mx-auto">
-					<h3 class="text-lg font-semibold text-gray-800 mb-4">
-						Отправить открытку
-					</h3>
-					<div class="space-y-4">
-						<div>
-							<label class="block text-sm font-medium text-gray-700 mb-2">
-								Получатель
-							</label>
-							<button
-								@click="selectTelegramContact"
-								class="w-full p-3 border border-gray-300 rounded-lg text-left hover:bg-gray-50 transition-colors"
-							>
-								{{ recipient || 'Выбрать контакт из Telegram' }}
-							</button>
-						</div>
-						<div class="flex space-x-3">
-							<button
-								@click="showSendModal = false"
-								class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors duration-200"
-							>
-								Отмена
-							</button>
-							<button
-								@click="sendToTelegram"
-								:disabled="!recipient.trim() || sending"
-								class="flex-1 py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								{{ sending ? 'Отправка...' : 'Отправить' }}
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
 		</div>
 	</div>
 </template>
@@ -96,21 +55,7 @@ import { toast } from 'vue3-toastify'
 
 const route = useRoute()
 const favorites = useFavoritesStore()
-const showSendModal = ref(false)
-const recipient = ref('')
 const sending = ref(false)
-
-const selectTelegramContact = () => {
-	if (window.Telegram && window.Telegram.WebApp) {
-		window.Telegram.WebApp.requestContact(contact => {
-			if (contact) {
-				recipient.value = contact.id.toString()
-			}
-		})
-	} else {
-		toast.info('Откройте в Telegram для выбора контакта')
-	}
-}
 
 const holiday = route.params.holiday
 const cardId = route.params.id
@@ -162,14 +107,7 @@ const download = async () => {
 	toast.success('Открытка скачана')
 }
 
-const openSendModal = () => {
-	console.log('openSendModal called')
-	showSendModal.value = true
-	recipient.value = ''
-}
-
 const sendToTelegram = async () => {
-	if (!recipient.value.trim()) return
 	sending.value = true
 	try {
 		const res = await fetch(card.value.image)
@@ -187,13 +125,17 @@ const sendToTelegram = async () => {
 		const sendRes = await fetch(`${import.meta.env.VITE_API_URL}/send`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ chatId: recipient.value, imageId }),
+			body: JSON.stringify({
+				chatId: import.meta.env.VITE_BOT_CHAT_ID,
+				imageId,
+			}),
 		})
 		if (!sendRes.ok) {
 			throw new Error('Ошибка отправки')
 		}
-		toast.success('Открытка отправлена!')
-		showSendModal.value = false
+		toast.success(
+			'Изображение добавлено в бот! Перешлите его кому угодно из бота.'
+		)
 	} catch (error) {
 		toast.error('Ошибка отправки: ' + error.message)
 	} finally {

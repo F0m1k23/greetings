@@ -18,4 +18,18 @@ export default defineConfig({
 			'@': fileURLToPath(new URL('./src', import.meta.url)),
 		},
 	},
+
+	// Оптимизации для продакшена
+	build: {
+		minify: 'esbuild',
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					vue: ['vue'],
+					router: ['vue-router'],
+					pinia: ['pinia'],
+				},
+			},
+		},
+	},
 })
