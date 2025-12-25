@@ -135,60 +135,45 @@ const download = async () => {
 const sendToTelegram = async () => {
 	sending.value = true
 	try {
-		const res = await fetch(card.value.image)
-		const blob = await res.blob()
+		// 1. Получаем blob (ВАЖНО: без fetch внешнего URL)
+		const blob = await new Promise((resolve, reject) => {
+			const img = new Image()
+			img.crossOrigin = 'anonymous'
+			img.src = card.value.image
+			img.onload = () => {
+				const canvas = document.createElement('canvas')
+				canvas.width = img.width
+				canvas.height = img.height
+				const ctx = canvas.getContext('2d')
+				ctx.drawImage(img, 0, 0)
+				canvas.toBlob(
+					b => (b ? resolve(b) : reject(new Error('Blob error'))),
+					'image/jpeg'
+				)
+			}
+			img.onerror = () => reject(new Error('Image load error'))
+		})
 
-		// Если в Telegram Web App
-		if (window.Telegram?.WebApp) {
-			const base64 = await blobToBase64(blob)
-			window.Telegram.WebApp.sendData(
-				JSON.stringify({
-					action: 'send_postcard',
-					file: base64,
-				})
-			)
-			toast.success('Открытка отправлена!')
-		} else {
-			// Fallback для веб-версии
-			const formData = new FormData()
-			formData.append('image', blob, 'postcard.jpg')
-			const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
-				method: 'POST',
-				body: formData,
-			})
-			if (!uploadRes.ok) {
-				throw new Error('Ошибка загрузки изображения')
-			}
-			const { imageId } = await uploadRes.json()
-			const sendRes = await fetch(`${import.meta.env.VITE_API_URL}/send`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					chatId: import.meta.env.VITE_BOT_CHAT_ID,
-					imageId,
-				}),
-			})
-			if (!sendRes.ok) {
-				throw new Error('Ошибка отправки')
-			}
-			toast.success(
-				'Изображение добавлено в бот! Перешлите его кому угодно из бота.'
-			)
+		// 2. Отправляем НА СЕРВЕР
+		const formData = new FormData()
+		formData.append('image', blob, 'postcard.jpg')
+
+		const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
+			method: 'POST',
+			body: formData,
+		})
+
+		if (!uploadRes.ok) {
+			throw new Error('Upload failed')
 		}
-	} catch (error) {
-		toast.error('Ошибка отправки: ' + error.message)
+
+		toast.success(
+			'Открытка отправлена в бот. Вы можете переслать её кому угодно.'
+		)
+	} catch (e) {
+		toast.error('Ошибка отправки: ' + e.message)
 	} finally {
 		sending.value = false
 	}
-}
-
-// Helper function
-const blobToBase64 = blob => {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader()
-		reader.onload = () => resolve(reader.result)
-		reader.onerror = reject
-		reader.readAsDataURL(blob)
-	})
 }
 </script>

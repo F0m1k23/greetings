@@ -222,71 +222,33 @@ export function useCanvas() {
 		sending.value = true
 
 		try {
+			// 1. Получаем blob (ВАЖНО: без fetch внешнего URL)
 			const blob = await new Promise((resolve, reject) => {
 				canvasRef.value.toBlob(
-					b => (b ? resolve(b) : reject(new Error('Blob generation failed'))),
+					b => (b ? resolve(b) : reject(new Error('Blob error'))),
 					'image/png'
 				)
 			})
 
-			// Если в Telegram Web App, используем Telegram API
-			if (window.Telegram?.WebApp) {
-				const file = new File([blob], 'postcard.png', { type: 'image/png' })
+			// 2. Отправляем НА СЕРВЕР
+			const formData = new FormData()
+			formData.append('image', blob, 'postcard.png')
 
-				// Отправляем файл через Telegram Web App
-				window.Telegram.WebApp.sendData(
-					JSON.stringify({
-						action: 'send_postcard',
-						file: await blobToBase64(blob),
-					})
-				)
+			const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
+				method: 'POST',
+				body: formData,
+			})
 
-				return true
-			} else {
-				// Fallback для веб-версии
-				const formData = new FormData()
-				formData.append('image', blob, 'postcard.png')
-
-				const uploadRes = await fetch(
-					`${import.meta.env.VITE_API_URL}/upload`,
-					{
-						method: 'POST',
-						body: formData,
-					}
-				)
-
-				if (!uploadRes.ok) throw new Error('Ошибка загрузки изображения')
-
-				const { imageId } = await uploadRes.json()
-
-				const sendRes = await fetch(`${import.meta.env.VITE_API_URL}/send`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						chatId: import.meta.env.VITE_BOT_CHAT_ID,
-						imageId,
-					}),
-				})
-
-				if (!sendRes.ok) throw new Error('Ошибка отправки')
-
-				return true
+			if (!uploadRes.ok) {
+				throw new Error('Upload failed')
 			}
-		} catch (error) {
-			throw error
+
+			return true
+		} catch (e) {
+			throw e
 		} finally {
 			sending.value = false
 		}
-	}
-
-	// Helper function to convert blob to base64
-	function blobToBase64(blob) {
-		return new Promise((resolve, reject) => {
-			const reader = new FileReader()
-			reader.onload = () => resolve(reader.result)
-			reader.onerror = reject
-			reader.readAsDataURL(blob)
-		})
 	}
 
 	return {
