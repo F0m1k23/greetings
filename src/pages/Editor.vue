@@ -327,14 +327,14 @@
 				<div class="space-y-4">
 					<div>
 						<label class="block text-sm font-medium text-gray-700 mb-2">
-							Chat ID получателя
+							Получатель
 						</label>
-						<input
-							v-model="recipient"
-							type="text"
-							placeholder="Например: 123456789"
-							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-						/>
+						<button
+							@click="selectTelegramContact"
+							class="w-full p-3 border border-gray-300 rounded-lg text-left hover:bg-gray-50 transition-colors"
+						>
+							{{ recipient || 'Выбрать контакт из Telegram' }}
+						</button>
 					</div>
 					<div class="flex space-x-3">
 						<button
@@ -388,6 +388,18 @@ const activeTab = ref('general')
 const showSendModal = ref(false)
 const recipient = ref('')
 const sending = ref(false)
+
+const selectTelegramContact = () => {
+	if (window.Telegram && window.Telegram.WebApp) {
+		window.Telegram.WebApp.requestContact(contact => {
+			if (contact) {
+				recipient.value = contact.id.toString()
+			}
+		})
+	} else {
+		toast.info('Откройте в Telegram для выбора контакта')
+	}
+}
 
 // ===== INIT =====
 onMounted(() => {
