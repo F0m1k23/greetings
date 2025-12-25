@@ -493,6 +493,7 @@ function download() {
 }
 
 function openSendModal() {
+	console.log('openSendModal called')
 	showSendModal.value = true
 	recipient.value = ''
 }

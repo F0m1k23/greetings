@@ -42,6 +42,47 @@
 					{{ isFav ? '⭐ Убрать из избранного' : '⭐ В избранное' }}
 				</button>
 			</div>
+
+			<!-- SEND MODAL -->
+			<div
+				v-if="showSendModal"
+				class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+				style="z-index: 9999 !important"
+			>
+				<div class="bg-white rounded-2xl p-6 w-full max-w-sm mx-auto">
+					<h3 class="text-lg font-semibold text-gray-800 mb-4">
+						Отправить открытку
+					</h3>
+					<div class="space-y-4">
+						<div>
+							<label class="block text-sm font-medium text-gray-700 mb-2">
+								Chat ID получателя
+							</label>
+							<input
+								v-model="recipient"
+								type="text"
+								placeholder="Например: 123456789"
+								class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+							/>
+						</div>
+						<div class="flex space-x-3">
+							<button
+								@click="showSendModal = false"
+								class="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors duration-200"
+							>
+								Отмена
+							</button>
+							<button
+								@click="sendToTelegram"
+								:disabled="!recipient.trim() || sending"
+								class="flex-1 py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{{ sending ? 'Отправка...' : 'Отправить' }}
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
