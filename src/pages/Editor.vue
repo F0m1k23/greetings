@@ -499,6 +499,8 @@ function openSendModal() {
 }
 
 async function sendToTelegram() {
+	console.log('recipient:', recipient.value)
+
 	console.log('API URL:', import.meta.env.VITE_API_URL)
 
 	if (!recipient.value.trim()) return
