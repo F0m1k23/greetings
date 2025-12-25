@@ -1,12 +1,13 @@
 <template>
-	<router-view />
+	<div class="min-h-screen bg-base-100 flex flex-col">
+		<div class="flex-1">
+			<router-view />
+		</div>
+
+		<BottomNav />
+	</div>
 </template>
 
-<script setup></script>
-
-<style scoped>
-#app {
-	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-		sans-serif;
-}
-</style>
+<script setup>
+import BottomNav from '@/components/BottomNav.vue'
+</script>

@@ -1,1 +1,8 @@
 @import "tailwindcss";
+@plugin "daisyui";
+
+/* можно добавить глобальные стили */
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, sans-serif;
+}
