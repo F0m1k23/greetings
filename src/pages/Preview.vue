@@ -19,7 +19,7 @@
 			<!-- КНОПКИ -->
 			<div class="space-y-3">
 				<button
-					@click="send"
+					@click="openSendModal"
 					:disabled="!card"
 					class="w-full py-4 px-6 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 				>
@@ -47,7 +47,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { templates } from '@/data/templates'
 import { useFavoritesStore } from '@/app/store/favorites'
