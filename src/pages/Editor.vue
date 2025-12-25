@@ -306,7 +306,7 @@
 					⬇️ Скачать
 				</button>
 				<button
-					@click="send"
+					@click="openSendModal"
 					class="flex-1 py-3 px-6 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 cursor-pointer"
 				>
 					📤 Отправить

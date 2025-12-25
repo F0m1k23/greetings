@@ -55,6 +55,9 @@ import { toast } from 'vue3-toastify'
 
 const route = useRoute()
 const favorites = useFavoritesStore()
+const showSendModal = ref(false)
+const recipient = ref('')
+const sending = ref(false)
 
 const holiday = route.params.holiday
 const cardId = route.params.id
