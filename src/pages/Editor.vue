@@ -1,54 +1,73 @@
 <template>
-	<div class="min-h-screen bg-base-200">
+	<div class="min-h-screen bg-gray-50">
 		<!-- HEADER -->
-		<div class="bg-base-100 shadow-sm p-4">
-			<h1 class="text-xl font-bold text-center">🎨 Генератор открыток</h1>
-		</div>
+		<header class="bg-white shadow-sm p-4 sticky top-0 z-10">
+			<h1 class="text-xl font-bold text-center text-gray-800">
+				🎨 Генератор открыток
+			</h1>
+		</header>
 
 		<!-- PREVIEW -->
-		<div class="p-4 bg-base-100">
-			<div class="card bg-base-200 shadow-lg max-w-sm mx-auto">
-				<figure class="p-4">
+		<div class="p-4 bg-white">
+			<div
+				class="max-w-sm mx-auto bg-gray-100 rounded-2xl shadow-lg overflow-hidden"
+			>
+				<div class="p-4 bg-gray-200">
 					<canvas
 						ref="canvasRef"
-						class="w-full rounded-xl bg-black/10"
+						class="w-full rounded-xl bg-gray-300"
 					></canvas>
-				</figure>
+				</div>
 			</div>
 		</div>
 
 		<!-- SETTINGS TABS -->
-		<div class="bg-base-100 min-h-[50vh] flex flex-col items-center">
-			<div class="tabs tabs-boxed justify-center p-4">
-				<a
-					:class="['tab', activeTab === 'general' && 'tab-active']"
+		<div class="bg-white flex-1">
+			<div class="flex justify-center p-2 border-b border-gray-200">
+				<button
+					:class="[
+						'flex-1 py-3 px-4 text-center font-medium transition-colors duration-200',
+						activeTab === 'general'
+							? 'text-blue-600 border-b-2 border-blue-600'
+							: 'text-gray-500 hover:text-gray-700',
+					]"
 					@click="activeTab = 'general'"
 				>
 					Общее
-				</a>
-				<a
-					:class="['tab', activeTab === 'text' && 'tab-active']"
+				</button>
+				<button
+					:class="[
+						'flex-1 py-3 px-4 text-center font-medium transition-colors duration-200',
+						activeTab === 'text'
+							? 'text-blue-600 border-b-2 border-blue-600'
+							: 'text-gray-500 hover:text-gray-700',
+					]"
 					@click="activeTab = 'text'"
 				>
 					Текст
-				</a>
-				<a
-					:class="['tab', activeTab === 'frame' && 'tab-active']"
+				</button>
+				<button
+					:class="[
+						'flex-1 py-3 px-4 text-center font-medium transition-colors duration-200',
+						activeTab === 'frame'
+							? 'text-blue-600 border-b-2 border-blue-600'
+							: 'text-gray-500 hover:text-gray-700',
+					]"
 					@click="activeTab = 'frame'"
 				>
 					Рамка
-				</a>
+				</button>
 			</div>
 
 			<div class="p-4 space-y-6">
 				<!-- GENERAL TAB -->
-				<div v-if="activeTab === 'general'" class="space-y-4">
-					<div class="form-control">
-						<label class="label">
-							<span class="label-text font-medium">Праздник</span>
+				<div v-if="activeTab === 'general'" class="space-y-6">
+					<div class="bg-white rounded-xl p-4 shadow-sm">
+						<label class="block text-sm font-medium text-gray-700 mb-2">
+							Праздник
 						</label>
 						<select
-							class="select select-bordered select-lg"
+							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer"
 							v-model="holiday"
 							@change="onHolidayChange"
 						>
@@ -58,23 +77,21 @@
 						</select>
 					</div>
 
-					<div>
-						<p class="font-medium mb-3">Картинка</p>
-						<div
-							class="carousel carousel-center space-x-4 p-4 bg-base-200 rounded-lg"
-						>
+					<div class="bg-white rounded-xl p-4 shadow-sm">
+						<p class="text-sm font-medium text-gray-700 mb-3">Картинка</p>
+						<div class="flex overflow-x-auto space-x-3 pb-2">
 							<div
 								v-for="img in (images || []).filter(img => img && img.image)"
 								:key="img.id"
-								class="carousel-item"
+								class="flex-shrink-0"
 							>
 								<img
 									:src="img.image"
-									class="w-20 h-20 rounded-xl object-cover cursor-pointer border-2 transition-all hover:scale-105"
+									class="w-20 h-20 rounded-xl object-cover cursor-pointer border-2 transition-all"
 									:class="
 										img.image === selectedImageSrc
-											? 'border-primary scale-105 shadow-lg'
-											: 'border-transparent'
+											? 'border-blue-500 scale-105 shadow-lg'
+											: 'border-transparent hover:border-gray-300'
 									"
 									@click="selectImage(img.image)"
 								/>
@@ -84,11 +101,13 @@
 				</div>
 
 				<!-- TEXT TAB -->
-				<div v-if="activeTab === 'text'" class="space-y-4">
-					<div>
-						<p class="font-medium mb-3">Текст поздравления</p>
+				<div v-if="activeTab === 'text'" class="space-y-6">
+					<div class="bg-white rounded-xl p-4 shadow-sm">
+						<p class="text-sm font-medium text-gray-700 mb-3">
+							Текст поздравления
+						</p>
 						<select
-							class="select select-bordered mb-3"
+							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer mb-3"
 							v-model="textMode"
 							@change="draw"
 						>
@@ -98,7 +117,7 @@
 
 						<select
 							v-if="textMode === 'preset'"
-							class="select select-bordered"
+							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer"
 							v-model="text"
 							@change="draw"
 						>
@@ -109,50 +128,65 @@
 
 						<textarea
 							v-else
-							class="textarea textarea-bordered textarea-lg w-full"
+							class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+							rows="4"
 							placeholder="Введите свой текст"
 							v-model="text"
 							@input="draw"
 						></textarea>
 					</div>
 
-					<div>
-						<label class="label">
-							<span class="label-text font-medium">Размер текста</span>
+					<div class="bg-white rounded-xl p-4 shadow-sm">
+						<label class="block text-sm font-medium text-gray-700 mb-2">
+							Размер текста
 						</label>
 						<input
 							type="range"
 							min="22"
 							max="72"
 							v-model="textSize"
-							class="range range-primary"
+							class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
 							@input="draw"
 						/>
-						<div class="text-sm text-center mt-1">{{ textSizeNum }}px</div>
+						<div class="text-sm text-center mt-1 text-gray-600">
+							{{ textSizeNum }}px
+						</div>
 					</div>
 
-					<div>
-						<label class="label">
-							<span class="label-text font-medium">Позиция текста</span>
+					<div class="bg-white rounded-xl p-4 shadow-sm">
+						<label class="block text-sm font-medium text-gray-700 mb-2">
+							Позиция текста
 						</label>
-						<div class="btn-group w-full">
+						<div class="flex space-x-2">
 							<button
-								class="btn btn-sm"
-								:class="textPosition === 'top' && 'btn-active'"
+								:class="[
+									'flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all',
+									textPosition === 'top'
+										? 'bg-blue-600 text-white'
+										: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+								]"
 								@click="setPosition('top')"
 							>
 								Верх
 							</button>
 							<button
-								class="btn btn-sm"
-								:class="textPosition === 'center' && 'btn-active'"
+								:class="[
+									'flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all',
+									textPosition === 'center'
+										? 'bg-blue-600 text-white'
+										: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+								]"
 								@click="setPosition('center')"
 							>
 								Центр
 							</button>
 							<button
-								class="btn btn-sm"
-								:class="textPosition === 'bottom' && 'btn-active'"
+								:class="[
+									'flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all',
+									textPosition === 'bottom'
+										? 'bg-blue-600 text-white'
+										: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+								]"
 								@click="setPosition('bottom')"
 							>
 								Низ
@@ -160,52 +194,68 @@
 						</div>
 					</div>
 
-					<div>
-						<label class="label">
-							<span class="label-text font-medium">Цвет текста</span>
+					<div class="bg-white rounded-xl p-4 shadow-sm">
+						<label class="block text-sm font-medium text-gray-700 mb-2">
+							Цвет текста
 						</label>
 						<input
 							type="color"
 							v-model="textColor"
-							class="w-full h-12 rounded-lg border-2 border-base-300"
+							class="w-full h-12 rounded-lg border-2 border-gray-300 cursor-pointer"
 							@input="draw"
 						/>
 					</div>
 
-					<div class="form-control">
-						<label class="label cursor-pointer justify-start gap-3">
+					<div
+						class="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between"
+					>
+						<div class="flex items-center space-x-3">
 							<input
 								type="checkbox"
-								class="toggle toggle-primary"
+								class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
 								v-model="textStroke"
 								@change="draw"
 							/>
-							<span class="label-text font-medium">Мягкая обводка текста</span>
-						</label>
+							<span class="text-sm font-medium text-gray-700"
+								>Мягкая обводка текста</span
+							>
+						</div>
 					</div>
 
-					<div>
-						<label class="label">
-							<span class="label-text font-medium">Оформление текста</span>
+					<div class="bg-white rounded-xl p-4 shadow-sm">
+						<label class="block text-sm font-medium text-gray-700 mb-2">
+							Оформление текста
 						</label>
-						<div class="btn-group w-full">
+						<div class="flex space-x-2">
 							<button
-								class="btn btn-sm"
-								:class="textBox === 'none' && 'btn-active'"
+								:class="[
+									'flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all',
+									textBox === 'none'
+										? 'bg-blue-600 text-white'
+										: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+								]"
 								@click="setTextBox('none')"
 							>
 								Без
 							</button>
 							<button
-								class="btn btn-sm"
-								:class="textBox === 'soft' && 'btn-active'"
+								:class="[
+									'flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all',
+									textBox === 'soft'
+										? 'bg-blue-600 text-white'
+										: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+								]"
 								@click="setTextBox('soft')"
 							>
 								Фон
 							</button>
 							<button
-								class="btn btn-sm"
-								:class="textBox === 'border' && 'btn-active'"
+								:class="[
+									'flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all',
+									textBox === 'border'
+										? 'bg-blue-600 text-white'
+										: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
+								]"
 								@click="setTextBox('border')"
 							>
 								Рамка
@@ -216,8 +266,8 @@
 
 				<!-- FRAME TAB -->
 				<div v-if="activeTab === 'frame'" class="space-y-4">
-					<div>
-						<p class="font-medium mb-3">Выберите рамку</p>
+					<div class="bg-white rounded-xl p-4 shadow-sm">
+						<p class="text-sm font-medium text-gray-700 mb-3">Выберите рамку</p>
 						<div class="grid grid-cols-2 gap-3">
 							<button
 								v-for="frame in (frames || []).filter(
@@ -225,16 +275,17 @@
 								)"
 								:key="frame.id"
 								:class="[
-									'btn btn-outline h-auto py-3',
-									selectedFrame.value &&
-										selectedFrame.value.id === frame.id &&
-										'btn-active',
+									'p-4 rounded-xl border-2 transition-all',
+									selectedFrame.value && selectedFrame.value.id === frame.id
+										? 'border-blue-500 bg-blue-50'
+										: 'border-gray-200 hover:border-gray-300',
 								]"
 								@click="selectFrame(frame)"
+								cursor-pointer
 							>
 								<div class="text-center">
-									<div class="text-lg mb-1">{{ frame.title }}</div>
-									<div class="text-xs opacity-70">
+									<div class="font-medium mb-1">{{ frame.title }}</div>
+									<div class="text-xs text-gray-500">
 										{{ frame.pro ? 'PRO' : 'Бесплатно' }}
 									</div>
 								</div>
@@ -246,12 +297,18 @@
 		</div>
 
 		<!-- ACTIONS -->
-		<div class="bg-base-100 p-4 border-t">
-			<div class="flex gap-3 max-w-sm mx-auto">
-				<button class="btn btn-primary flex-1" @click="download">
+		<div class="bg-white p-4 border-t border-gray-200">
+			<div class="flex space-x-3 max-w-sm mx-auto">
+				<button
+					@click="download"
+					class="flex-1 py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+				>
 					⬇️ Скачать
 				</button>
-				<button class="btn btn-secondary flex-1" @click="send">
+				<button
+					@click="send"
+					class="flex-1 py-3 px-6 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 cursor-pointer"
+				>
 					📤 Отправить
 				</button>
 			</div>
@@ -287,6 +344,9 @@ const textStroke = ref(true)
 const textBox = ref('soft')
 const selectedFrame = ref(null)
 const activeTab = ref('general')
+const showSendModal = ref(false)
+const recipient = ref('')
+const sending = ref(false)
 
 // ===== INIT =====
 onMounted(() => {

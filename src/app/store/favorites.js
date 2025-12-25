@@ -35,10 +35,8 @@ export const useFavoritesStore = defineStore('favorites', () => {
 	const toggle = card => {
 		if (isFavorite(card)) {
 			removeFromFavorites(card)
-			toast.success('Удалено из избранного')
 		} else {
 			addToFavorites(card)
-			toast.success('Добавлено в избранное')
 		}
 	}
 

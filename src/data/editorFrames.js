@@ -1,5 +1,55 @@
 const frames = [
 	{
+		id: 'none',
+		title: 'Без рамки',
+		pro: false,
+		draw(ctx) {
+			// Ничего не рисуем - чистый холст
+		},
+	},
+	{
+		id: 'minimal-black',
+		title: 'Тонкая черная',
+		pro: false,
+		draw(ctx) {
+			// Очень тонкая черная рамка
+			ctx.strokeStyle = '#1a1a1a'
+			ctx.lineWidth = 3
+			ctx.strokeRect(15, 15, 770, 970)
+		},
+	},
+	{
+		id: 'soft-gray',
+		title: 'Мягкий серый',
+		pro: false,
+		draw(ctx) {
+			// Мягкая серая рамка с легким свечением
+			ctx.strokeStyle = '#9ca3af'
+			ctx.lineWidth = 8
+			ctx.shadowColor = 'rgba(156, 163, 175, 0.3)'
+			ctx.shadowBlur = 8
+			ctx.strokeRect(20, 20, 760, 960)
+		},
+	},
+	{
+		id: 'pastel-gradient',
+		title: 'Пастельный градиент',
+		pro: false,
+		draw(ctx) {
+			// Мягкий пастельный градиент
+			const gradient = ctx.createLinearGradient(0, 0, 800, 1000)
+			gradient.addColorStop(0, '#fce7f3')
+			gradient.addColorStop(0.5, '#e0e7ff')
+			gradient.addColorStop(1, '#ecfdf5')
+
+			ctx.strokeStyle = gradient
+			ctx.lineWidth = 12
+			ctx.shadowColor = 'rgba(252, 231, 243, 0.4)'
+			ctx.shadowBlur = 12
+			ctx.strokeRect(18, 18, 764, 964)
+		},
+	},
+	{
 		id: 'elegant-gold',
 		title: 'Элегантное золото',
 		pro: false,
@@ -19,22 +69,43 @@ const frames = [
 		},
 	},
 	{
-		id: 'soft-silver',
-		title: 'Мягкое серебро',
+		id: 'corner-dots',
+		title: 'Угловые точки',
 		pro: false,
 		draw(ctx) {
-			// Серебряная рамка с мягким блеском
-			ctx.strokeStyle = '#c0c0c0'
-			ctx.lineWidth = 18
-			ctx.shadowColor = 'rgba(192, 192, 192, 0.4)'
-			ctx.shadowBlur = 12
-			ctx.strokeRect(22, 22, 756, 956)
+			// Тонкие линии с точками по углам
+			ctx.strokeStyle = '#6b7280'
+			ctx.lineWidth = 2
+			ctx.strokeRect(20, 20, 760, 960)
 
-			// Внутренний контур
-			ctx.strokeStyle = '#e0e0e0'
-			ctx.lineWidth = 3
-			ctx.shadowBlur = 0
-			ctx.strokeRect(42, 42, 716, 916)
+			// Маленькие точки по углам
+			ctx.fillStyle = '#6b7280'
+			const dots = [
+				[20, 20],
+				[780, 20],
+				[20, 980],
+				[780, 980],
+			]
+			dots.forEach(([x, y]) => {
+				ctx.beginPath()
+				ctx.arc(x, y, 4, 0, Math.PI * 2)
+				ctx.fill()
+			})
+		},
+	},
+	{
+		id: 'subtle-shadow',
+		title: 'Легкая тень',
+		pro: false,
+		draw(ctx) {
+			// Рамка с мягкой внутренней тенью
+			ctx.strokeStyle = '#f3f4f6'
+			ctx.lineWidth = 25
+			ctx.shadowColor = 'rgba(0, 0, 0, 0.1)'
+			ctx.shadowBlur = 20
+			ctx.shadowOffsetX = 5
+			ctx.shadowOffsetY = 5
+			ctx.strokeRect(15, 15, 770, 970)
 		},
 	},
 	{
@@ -51,139 +122,85 @@ const frames = [
 		},
 	},
 	{
-		id: 'royal-platinum',
-		title: 'Королевская платина',
-		pro: true,
+		id: 'double-line',
+		title: 'Двойная линия',
+		pro: false,
 		draw(ctx) {
-			// Роскошная платиновая рамка
-			const gradient = ctx.createLinearGradient(0, 0, 800, 1000)
-			gradient.addColorStop(0, '#e5e4e2')
-			gradient.addColorStop(1, '#b8b8b8')
-
-			ctx.strokeStyle = gradient
-			ctx.lineWidth = 28
-			ctx.shadowColor = 'rgba(229, 228, 226, 0.6)'
-			ctx.shadowBlur = 20
-			ctx.strokeRect(18, 18, 764, 964)
-
-			// Внутренний глянцевый эффект
-			ctx.strokeStyle = '#ffffff'
-			ctx.lineWidth = 8
-			ctx.shadowBlur = 0
-			ctx.strokeRect(38, 38, 724, 924)
-
-			// Декоративные элементы
-			ctx.fillStyle = '#ffffff'
-			ctx.shadowColor = 'rgba(255, 255, 255, 0.7)'
-			ctx.shadowBlur = 10
-
-			const points = [
-				[50, 50],
-				[750, 50],
-				[50, 950],
-				[750, 950],
-				[100, 100],
-				[700, 100],
-				[100, 900],
-				[700, 900],
-			]
-
-			points.forEach(([x, y]) => {
-				ctx.beginPath()
-				ctx.arc(x, y, 4, 0, Math.PI * 2)
-				ctx.fill()
-			})
-		},
-	},
-	{
-		id: 'crystal-elegance',
-		title: 'Хрустальная элегантность',
-		pro: true,
-		draw(ctx) {
-			// Хрустальная рамка с мягким сиянием
-			ctx.strokeStyle = 'rgba(240, 248, 255, 0.9)'
-			ctx.lineWidth = 24
-			ctx.shadowColor = 'rgba(173, 216, 230, 0.5)'
-			ctx.shadowBlur = 25
-			ctx.strokeRect(20, 20, 760, 960)
-
-			// Внутренний контур
-			ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)'
+			// Двойная рамка с разными цветами
+			ctx.strokeStyle = '#374151'
 			ctx.lineWidth = 6
-			ctx.shadowBlur = 0
-			ctx.strokeRect(40, 40, 720, 920)
-
-			// Кристаллические узоры
-			ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'
-			ctx.lineWidth = 2
-
-			const corners = [
-				[30, 30],
-				[770, 30],
-				[30, 970],
-				[770, 970],
-			]
-
-			corners.forEach(([x, y]) => {
-				ctx.beginPath()
-				for (let i = 0; i < 8; i++) {
-					const angle = (Math.PI * 2 * i) / 8
-					const length = 20
-					const endX = x + Math.cos(angle) * length
-					const endY = y + Math.sin(angle) * length
-					ctx.moveTo(x, y)
-					ctx.lineTo(endX, endY)
-				}
-				ctx.stroke()
-			})
-		},
-	},
-	{
-		id: 'luxury-golden',
-		title: 'Роскошное золото',
-		pro: true,
-		draw(ctx) {
-			// Роскошная золотая рамка
-			const gradient = ctx.createLinearGradient(0, 0, 800, 1000)
-			gradient.addColorStop(0, '#ffd700')
-			gradient.addColorStop(0.5, '#daa520')
-			gradient.addColorStop(1, '#b8860b')
-
-			ctx.strokeStyle = gradient
-			ctx.lineWidth = 30
-			ctx.shadowColor = 'rgba(218, 165, 32, 0.7)'
-			ctx.shadowBlur = 25
 			ctx.strokeRect(15, 15, 770, 970)
 
-			// Внутренний контур
-			ctx.strokeStyle = '#ffd700'
-			ctx.lineWidth = 10
+			ctx.strokeStyle = '#d1d5db'
+			ctx.lineWidth = 2
+			ctx.strokeRect(25, 25, 750, 950)
+		},
+	},
+	{
+		id: 'rounded-corners',
+		title: 'Закругленные углы',
+		pro: false,
+		draw(ctx) {
+			// Рамка с закругленными углами
+			ctx.strokeStyle = '#6b7280'
+			ctx.lineWidth = 8
+			ctx.lineJoin = 'round'
+			ctx.lineCap = 'round'
+
+			const radius = 20
+			ctx.beginPath()
+			ctx.moveTo(radius + 20, 20)
+			ctx.lineTo(780 - radius, 20)
+			ctx.arcTo(780, 20, 780, 20 + radius, radius)
+			ctx.lineTo(780, 980 - radius)
+			ctx.arcTo(780, 980, 780 - radius, 980, radius)
+			ctx.lineTo(20 + radius, 980)
+			ctx.arcTo(20, 980, 20, 980 - radius, radius)
+			ctx.lineTo(20, 20 + radius)
+			ctx.arcTo(20, 20, 20 + radius, 20, radius)
+			ctx.closePath()
+			ctx.stroke()
+		},
+	},
+	{
+		id: 'warm-gradient',
+		title: 'Теплый градиент',
+		pro: false,
+		draw(ctx) {
+			// Мягкий теплый градиент
+			const gradient = ctx.createLinearGradient(0, 0, 800, 1000)
+			gradient.addColorStop(0, '#fef3c7')
+			gradient.addColorStop(0.5, '#fde68a')
+			gradient.addColorStop(1, '#f59e0b')
+
+			ctx.strokeStyle = gradient
+			ctx.lineWidth = 16
+			ctx.shadowColor = 'rgba(245, 158, 11, 0.3)'
+			ctx.shadowBlur = 15
+			ctx.strokeRect(16, 16, 768, 968)
+		},
+	},
+	{
+		id: 'elegant-gold',
+		title: 'Элегантное золото',
+		pro: true,
+		draw(ctx) {
+			// Сдержанная золотая рамка без излишеств
+			const gradient = ctx.createLinearGradient(0, 0, 800, 1000)
+			gradient.addColorStop(0, '#f59e0b')
+			gradient.addColorStop(1, '#d97706')
+
+			ctx.strokeStyle = gradient
+			ctx.lineWidth = 14
+			ctx.shadowColor = 'rgba(245, 158, 11, 0.4)'
+			ctx.shadowBlur = 12
+			ctx.strokeRect(18, 18, 764, 964)
+
+			// Тонкая внутренняя линия
+			ctx.strokeStyle = '#fbbf24'
+			ctx.lineWidth = 3
 			ctx.shadowBlur = 0
 			ctx.strokeRect(35, 35, 730, 930)
-
-			// Угловые украшения
-			ctx.fillStyle = '#ffd700'
-			ctx.shadowColor = 'rgba(218, 165, 32, 0.5)'
-			ctx.shadowBlur = 10
-
-			const drawCorner = (x, y, rotation) => {
-				ctx.save()
-				ctx.translate(x, y)
-				ctx.rotate(rotation)
-
-				ctx.beginPath()
-				ctx.moveTo(0, 0)
-				ctx.bezierCurveTo(20, -30, 50, -15, 35, 15)
-				ctx.bezierCurveTo(20, 40, -20, 25, 0, 0)
-				ctx.fill()
-
-				ctx.restore()
-			}
-
-			drawCorner(50, 50, 0)
-			drawCorner(750, 50, Math.PI / 2)
-			drawCorner(50, 950, -Math.PI / 2)
-			drawCorner(750, 950, Math.PI)
 		},
 	},
 ]
