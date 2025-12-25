@@ -492,7 +492,57 @@ function download() {
 	toast.success('Открытка успешно скачана!')
 }
 
-function send() {
-	toast.info('Отправка в Telegram будет доступна в следующей версии')
+function openSendModal() {
+	showSendModal.value = true
+	recipient.value = ''
+}
+
+async function sendToTelegram() {
+	if (!recipient.value.trim()) return
+
+	sending.value = true
+
+	try {
+		const blob = await new Promise((resolve, reject) => {
+			canvasRef.value.toBlob(
+				b => (b ? resolve(b) : reject(new Error('Blob generation failed'))),
+				'image/png'
+			)
+		})
+
+		const formData = new FormData()
+		formData.append('image', blob, 'postcard.png')
+
+		const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
+			method: 'POST',
+			body: formData,
+		})
+
+		if (!uploadRes.ok) {
+			throw new Error('Ошибка загрузки изображения')
+		}
+
+		const { imageId } = await uploadRes.json()
+
+		const sendRes = await fetch(`${import.meta.env.VITE_API_URL}/send`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				chatId: recipient.value,
+				imageId,
+			}),
+		})
+
+		if (!sendRes.ok) {
+			throw new Error('Ошибка отправки')
+		}
+
+		toast.success('Открытка отправлена!')
+		showSendModal.value = false
+	} catch (error) {
+		toast.error('Ошибка отправки: ' + error.message)
+	} finally {
+		sending.value = false
+	}
 }
 </script>
